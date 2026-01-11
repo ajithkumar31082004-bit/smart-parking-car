@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment | SmartPark AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --ev-green: #10b981;
+            --danger: #ef4444;
+            --success: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .logo i {
+            color: var(--ev-green);
+        }
+        nav {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        nav a:hover {
+            color: #93c5fd;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            flex: 1;
+            display: flex;
+            gap: 2rem;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+        .booking-summary {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            height: fit-content;
+        }
+        .payment-section {
+            flex: 2;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .booking-details {
+            margin-bottom: 1.5rem;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 500;
+            color: var(--gray);
+        }
+        .detail-value {
+            font-weight: 600;
+            text-align: right;
+        }
+        .ev-badge {
+            background: var(--ev-green);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-left: 0.5rem;
+        }
+        .charge-breakdown {
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 3px solid var(--ev-green);
+            padding: 0.5rem 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .charge-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.3rem 0;
+        }
+        .total-row {
+            font-weight: 700;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .price {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        /* Payment Methods */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (max-width: 480px) {
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+        .payment-method {
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .payment-method:hover {
+            border-color: var(--primary);
+        }
+        .payment-method.selected {
+            border-color: var(--primary);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+        .payment-method i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        .payment-form {
+            display: none;
+            margin-top: 1.5rem;
+        }
+        .payment-form.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 480px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .pay-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .pay-btn:hover {
+            background: var(--primary-dark);
+        }
+        .pay-btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+        }
+        
+        /* Processing Overlay */
+        .processing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        .processing-overlay.active {
+            display: flex;
+        }
+        .processing-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .processing-text {
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        /* Success Message */
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        .success-message.active {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .success-message i {
+            color: var(--success);
+            font-size: 1.5rem;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        /* Security Badges */
+        .security-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            opacity: 0.7;
+        }
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-car"></i>
+            <span>SmartPark AI</span>
+        </div>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="slots.html"><i class="fas fa-map-marker-alt"></i> Parking Slots</a>
+            <a href="booking.html"><i class="fas fa-bookmark"></i> Book Now</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="booking-summary">
+            <h2 class="section-title">
+                <i class="fas fa-receipt"></i> Booking Summary
+            </h2>
+            <div class="booking-details" id="bookingDetails">
+                <!-- Booking details will be inserted by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="payment-section">
+            <h2 class="section-title">
+                <i class="fas fa-credit-card"></i> Payment Details
+            </h2>
+            
+            <div class="payment-methods">
+                <div class="payment-method" data-method="card">
+                    <i class="fas fa-credit-card"></i>
+                    <div>Credit/Debit Card</div>
+                </div>
+                <div class="payment-method" data-method="paypal">
+                    <i class="fab fa-paypal"></i>
+                    <div>PayPal</div>
+                </div>
+                <div class="payment-method" data-method="googlepay">
+                    <i class="fab fa-google-pay"></i>
+                    <div>Google Pay</div>
+                </div>
+                <div class="payment-method" data-method="applepay">
+                    <i class="fab fa-apple-pay"></i>
+                    <div>Apple Pay</div>
+                </div>
+            </div>
+            
+            <!-- Credit Card Form -->
+            <div class="payment-form" id="cardForm">
+                <div class="form-group">
+                    <label for="cardNumber">Card Number</label>
+                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                </div>
+                <div class="form-group">
+                    <label for="cardName">Name on Card</label>
+                    <input type="text" id="cardName" placeholder="John Doe">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expiryDate">Expiry Date</label>
+                        <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV</label>
+                        <input type="text" id="cvv" placeholder="123" maxlength="3">
+                    </div>
+                </div>
+                <button class="pay-btn" id="payButton">
+                    <i class="fas fa-lock"></i> Pay Now
+                </button>
+            </div>
+            
+            <!-- Other payment method messages -->
+            <div class="payment-form" id="otherMethodForm">
+                <div class="info-title">
+                    <i class="fas fa-info-circle"></i> Redirecting to payment gateway
+                </div>
+                <p>You will be redirected to complete your payment securely.</p>
+                <button class="pay-btn" id="simulatePayment">
+                    <i class="fas fa-external-link-alt"></i> Simulate Payment
+                </button>
+            </div>
+            
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle"></i>
+                <div>Payment successful! Redirecting to your booking confirmation...</div>
+            </div>
+            
+            <div class="security-badges">
+                <div class="security-badge">
+                    <i class="fas fa-lock"></i>
+                    <span>SSL Secure</span>
+                </div>
+                <div class="security-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>PCI Compliant</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="processing-overlay" id="processingOverlay">
+        <div class="processing-spinner"></div>
+        <div class="processing-text">Processing your payment...</div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 AI-IoT Smart Parking System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get booking data from localStorage
+            const storedData = localStorage.getItem('bookingData');
+            
+            if (!storedData) {
+                alert('No booking data found. Please make a booking first.');
+                window.location.href = 'booking.html';
+                return;
+            }
+            
+            const bookingData = JSON.parse(storedData);
+            const bookingDetails = document.getElementById('bookingDetails');
+            const paymentMethods = document.querySelectorAll('.payment-method');
+            const cardForm = document.getElementById('cardForm');
+            const otherMethodForm = document.getElementById('otherMethodForm');
+            const payButton = document.getElementById('payButton');
+            const simulatePayment = document.getElementById('simulatePayment');
+            const processingOverlay = document.getElementById('processingOverlay');
+            const successMessage = document.getElementById('successMessage');
+
+            let priceBreakdown = '';
+            let basePrice = 0;
+            let evCharge = 0;
+            let bookingRef = `SP-${Math.floor(100000 + Math.random() * 900000)}`;
+            
+            if (bookingData.bookingType === 'hour') {
+                const start = new Date(`2000-01-01T${bookingData.startTime}`);
+                const end = new Date(`2000-01-01T${bookingData.endTime}`);
+                const hours = (end - start) / (1000 * 60 * 60);
+                basePrice = hours * 50;
+                
+                if (bookingData.type === 'ev') {
+                    evCharge = hours * 20;
+                    priceBreakdown = `
+                        <div class="charge-breakdown">
+                            <div class="charge-item">
+                                <span>Base parking (${hours.toFixed(1)} hrs @ ₹50/hr):</span>
+                                <span>₹${basePrice}</span>
+                            </div>
+                            <div class="charge-item">
+                                <span>EV charging (${hours.toFixed(1)} hrs @ ₹20/hr):</span>
+                                <span>₹${evCharge}</span>
+                            </div>
+                            <div class="charge-item total-row">
+                                <span>Total Amount:</span>
+                                <span class="price">₹${basePrice + evCharge}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    priceBreakdown = `
+                        <div class="charge-breakdown">
+                            <div class="charge-item total-row">
+                                <span>Total Amount:</span>
+                                <span class="price">₹${basePrice}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else if (bookingData.bookingType === 'day') {
+                const start = new Date(bookingData.startDate);
+                const end = new Date(bookingData.endDate);
+                const days = ((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                basePrice = days * 300;
+                
+                if (bookingData.type === 'ev') {
+                    evCharge = days * 100;
+                    priceBreakdown = `
+                        <div class="charge-breakdown">
+                            <div class="charge-item">
+                                <span>Base parking (${days} days @ ₹300/day):</span>
+                                <span>₹${basePrice}</span>
+                            </div>
+                            <div class="charge-item">
+                                <span>EV charging (${days} days @ ₹100/day):</span>
+                                <span>₹${evCharge}</span>
+                            </div>
+                            <div class="charge-item total-row">
+                                <span>Total Amount:</span>
+                                <span class="price">₹${basePrice + evCharge}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    priceBreakdown = `
+                        <div class="charge-breakdown">
+                            <div class="charge-item total-row">
+                                <span>Total Amount:</span>
+                                <span class="price">₹${basePrice}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            let evBadge = '';
+            if (bookingData.type === 'ev') {
+                evBadge = '<span class="ev-badge"><i class="fas fa-bolt"></i> EV Charging</span>';
+            }
+
+            bookingDetails.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">Booking Reference</span>
+                    <span class="detail-value">${bookingRef}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Parking Slot</span>
+                    <span class="detail-value">${bookingData.slot} ${evBadge}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Customer Name</span>
+                    <span class="detail-value">${bookingData.name}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Vehicle Number</span>
+                    <span class="detail-value">${bookingData.vehicle}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Booking Type</span>
+                    <span class="detail-value">${bookingData.bookingType === 'hour' ? 'Hourly Parking' : 'Daily Parking'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Duration</span>
+                    <span class="detail-value">${bookingData.durationText}</span>
+                </div>
+                ${priceBreakdown}
+            `;
+
+            // Payment method selection
+            paymentMethods.forEach(method => {
+                method.addEventListener('click', function() {
+                    // Remove selected class from all methods
+                    paymentMethods.forEach(m => m.classList.remove('selected'));
+                    // Add selected class to clicked method
+                    this.classList.add('selected');
+                    
+                    const methodType = this.getAttribute('data-method');
+                    
+                    // Show appropriate form
+                    if (methodType === 'card') {
+                        cardForm.classList.add('active');
+                        otherMethodForm.classList.remove('active');
+                    } else {
+                        cardForm.classList.remove('active');
+                        otherMethodForm.classList.add('active');
+                    }
+                });
+            });
+            
+            // Format card number input
+            const cardNumberInput = document.getElementById('cardNumber');
+            if (cardNumberInput) {
+                cardNumberInput.addEventListener('input', function() {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.length > 16) value = value.slice(0, 16);
+                    
+                    // Add spaces every 4 characters
+                    let formattedValue = '';
+                    for (let i = 0; i < value.length; i++) {
+                        if (i > 0 && i % 4 === 0) formattedValue += ' ';
+                        formattedValue += value[i];
+                    }
+                    
+                    this.value = formattedValue;
+                });
+            }
+            
+            // Format expiry date input
+            const expiryInput = document.getElementById('expiryDate');
+            if (expiryInput) {
+                expiryInput.addEventListener('input', function() {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.length > 4) value = value.slice(0, 4);
+                    
+                    if (value.length > 2) {
+                        this.value = value.slice(0, 2) + '/' + value.slice(2);
+                    } else {
+                        this.value = value;
+                    }
+                });
+            }
+            
+            // Handle payment
+            function processPayment() {
+                // Show processing overlay
+                processingOverlay.classList.add('active');
+                
+                // Simulate payment processing
+                setTimeout(function() {
+                    // Hide processing overlay
+                    processingOverlay.classList.remove('active');
+                    
+                    // Show success message
+                    successMessage.classList.add('active');
+                    
+                    // Store payment status in booking data
+                    bookingData.paid = true;
+                    bookingData.bookingRef = bookingRef;
+                    localStorage.setItem('bookingData', JSON.stringify(bookingData));
+                    
+                    // Redirect to bill page after a delay
+                    setTimeout(function() {
+                        window.location.href = 'bill.html';
+                    }, 2000);
+                }, 3000);
+            }
+            
+            // Add event listeners to payment buttons
+            if (payButton) {
+                payButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Basic validation for card payment
+                    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+                    const cardName = document.getElementById('cardName').value;
+                    const expiryDate = document.getElementById('expiryDate').value;
+                    const cvv = document.getElementById('cvv').value;
+                    
+                    if (!cardNumber || cardNumber.length !== 16) {
+                        alert('Please enter a valid 16-digit card number');
+                        return;
+                    }
+                    
+                    if (!cardName) {
+                        alert('Please enter the name on your card');
+                        return;
+                    }
+                    
+                    if (!expiryDate || expiryDate.length !== 5) {
+                        alert('Please enter a valid expiry date (MM/YY)');
+                        return;
+                    }
+                    
+                    if (!cvv || cvv.length !== 3) {
+                        alert('Please enter a valid 3-digit CVV');
+                        return;
+                    }
+                    
+                    processPayment();
+                });
+            }
+            
+            if (simulatePayment) {
+                simulatePayment.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    processPayment();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
