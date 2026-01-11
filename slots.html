@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Slots | SmartPark AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --ev-green: #10b981;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f9fafb;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        body {
+            background-color: #f3f4f6;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .logo i {
+            color: var(--ev-green);
+        }
+        nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        nav a:hover {
+            color: #93c5fd;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .parking-lot {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .floor {
+            margin-bottom: 3rem;
+        }
+        .floor-title {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        .slot {
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .slot:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .slot.ev {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
+            border: 2px solid var(--ev-green);
+        }
+        .slot.normal {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(37, 99, 235, 0.2));
+            border: 2px solid var(--primary);
+        }
+        .slot.booked {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.2));
+            border: 2px solid var(--danger);
+            cursor: not-allowed;
+        }
+        .slot-id {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .slot-type {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        .ev-type {
+            background: var(--ev-green);
+            color: white;
+        }
+        .normal-type {
+            background: var(--primary);
+            color: white;
+        }
+        .booked-type {
+            background: var(--danger);
+            color: white;
+        }
+        .road {
+            height: 40px;
+            background: #9e9e9e;
+            margin: 1rem 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .legend-color.ev {
+            background: var(--ev-green);
+        }
+        .legend-color.normal {
+            background: var(--primary);
+        }
+        .legend-color.booked {
+            background: var(--danger);
+        }
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            nav {
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .slots-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-car"></i>
+            <span>SmartPark AI</span>
+        </div>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="slots.html"><i class="fas fa-map-marker-alt"></i> Parking Slots</a>
+            <a href="booking.html"><i class="fas fa-bookmark"></i> Book Now</a>
+            <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1><i class="fas fa-parking"></i> Available Parking Slots</h1>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color ev"></div>
+                <span>EV Charging</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color normal"></div>
+                <span>Regular Parking</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color booked"></div>
+                <span>Booked</span>
+            </div>
+        </div>
+
+        <div class="parking-lot">
+            <div class="floor">
+                <div class="floor-title">
+                    <i class="fas fa-layer-group"></i> Ground Floor
+                </div>
+                <div class="slots-grid">
+                    <!-- EV Slots 1-5 -->
+                    <div class="slot ev" onclick="bookSlot(1, 'ev')">
+                        <div class="slot-id">EV 1 ⚡</div>
+                        <div class="slot-type ev-type">Available</div>
+                    </div>
+                    <div class="slot ev" onclick="bookSlot(2, 'ev')">
+                        <div class="slot-id">EV 2 ⚡</div>
+                        <div class="slot-type ev-type">Available</div>
+                    </div>
+                    <div class="slot ev" onclick="bookSlot(3, 'ev')">
+                        <div class="slot-id">EV 3 ⚡</div>
+                        <div class="slot-type ev-type">Available</div>
+                    </div>
+                    <div class="slot ev" onclick="bookSlot(4, 'ev')">
+                        <div class="slot-id">EV 4 ⚡</div>
+                        <div class="slot-type ev-type">Available</div>
+                    </div>
+                    <div class="slot ev" onclick="bookSlot(5, 'ev')">
+                        <div class="slot-id">EV 5 ⚡</div>
+                        <div class="slot-type ev-type">Available</div>
+                    </div>
+                </div>
+                
+                <div class="road">Main Road</div>
+                
+                <div class="slots-grid">
+                    <!-- Normal Slots 6-10 -->
+                    <div class="slot normal" onclick="bookSlot(6, 'normal')">
+                        <div class="slot-id">Slot 6</div>
+                        <div class="slot-type normal-type">Available</div>
+                    </div>
+                    <div class="slot normal" onclick="bookSlot(7, 'normal')">
+                        <div class="slot-id">Slot 7</div>
+                        <div class="slot-type normal-type">Available</div>
+                    </div>
+                    <div class="slot normal" onclick="bookSlot(8, 'normal')">
+                        <div class="slot-id">Slot 8</div>
+                        <div class="slot-type normal-type">Available</div>
+                    </div>
+                    <div class="slot booked">
+                        <div class="slot-id">Slot 9</div>
+                        <div class="slot-type booked-type">Booked</div>
+                    </div>
+                    <div class="slot normal" onclick="bookSlot(10, 'normal')">
+                        <div class="slot-id">Slot 10</div>
+                        <div class="slot-type normal-type">Available</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="floor">
+                <div class="floor-title">
+                    <i class="fas fa-layer-group"></i> First Floor
+                </div>
+                <div class="slots-grid">
+                    <!-- EV Slots 11-15 -->
+                    <div class="slot ev" onclick="bookSlot(11, 'ev')">
+                        <div class="slot-id">EV 11 ⚡</div>
+                        <div class="slot-type ev-type">Available</div>
+                    </div>
+                    <div class="slot booked">
+                        <div class="slot-id">EV 12 ⚡</div>
+                        <div class="slot-type booked-type">Booked</div>
+                    </div>
+                    <div class="slot ev" onclick="bookSlot(13, 'ev')">
+                        <div class="slot-id">EV 13 ⚡</div>
+                        <div class="slot-type ev-type">Available</div>
+                    </div>
+                    <div class="slot ev" onclick="bookSlot(14, 'ev')">
+                        <div class="slot-id">EV 14 ⚡</div>
+                        <div class="slot-type ev-type">Available</div>
+                    </div>
+                    <div class="slot ev" onclick="bookSlot(15, 'ev')">
+                        <div class="slot-id">EV 15 ⚡</div>
+                        <div class="slot-type ev-type">Available</div>
+                    </div>
+                </div>
+                
+                <div class="road">Main Road</div>
+                
+                <div class="slots-grid">
+                    <!-- Normal Slots 16-20 -->
+                    <div class="slot normal" onclick="bookSlot(16, 'normal')">
+                        <div class="slot-id">Slot 16</div>
+                        <div class="slot-type normal-type">Available</div>
+                    </div>
+                    <div class="slot normal" onclick="bookSlot(17, 'normal')">
+                        <div class="slot-id">Slot 17</div>
+                        <div class="slot-type normal-type">Available</div>
+                    </div>
+                    <div class="slot booked">
+                        <div class="slot-id">Slot 18</div>
+                        <div class="slot-type booked-type">Booked</div>
+                    </div>
+                    <div class="slot normal" onclick="bookSlot(19, 'normal')">
+                        <div class="slot-id">Slot 19</div>
+                        <div class="slot-type normal-type">Available</div>
+                    </div>
+                    <div class="slot normal" onclick="bookSlot(20, 'normal')">
+                        <div class="slot-id">Slot 20</div>
+                        <div class="slot-type normal-type">Available</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function bookSlot(slotNumber, type) {
+            window.location.href = `booking.html?slot=${slotNumber}&type=${type}`;
+        }
+    </script>
+</body>
+</html>

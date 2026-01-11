@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>3D Parking Demo | SmartPark AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --ev-green: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        #info {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        #info h2 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #info p {
+            font-size: 14px;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .stat-box {
+            background: rgba(249, 250, 251, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        .stat-value {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--primary);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 5px;
+            transition: all 0.2s;
+        }
+        .button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        .button.secondary {
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .label {
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--dark);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .ev-badge {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            z-index: 100;
+            background: var(--ev-green);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loader {
+            border: 5px solid #e5e7eb;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div class="loader"></div>
+        <h3>Loading 3D Parking Environment</h3>
+        <p>Powered by AI-IoT Smart Parking System</p>
+    </div>
+
+    <div id="info">
+        <h2><i class="fas fa-car"></i> SmartPark AI Demo</h2>
+        <p>Click on any parking slot to book it. EV slots are shown in green with ⚡ symbol.</p>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-value" id="available-slots">20</div>
+                <div class="stat-label">Available</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="ev-slots">10</div>
+                <div class="stat-label">EV Charging</div>
+            </div>
+        </div>
+        
+        <a href="booking.html" class="button">
+            <i class="fas fa-bookmark"></i> Quick Book
+        </a>
+        <a href="#" id="resetView" class="button secondary">
+            <i class="fas fa-sync-alt"></i> Reset View
+        </a>
+    </div>
+
+    <div class="ev-badge">
+        <i class="fas fa-bolt"></i> EV Mode Active
+    </div>
+
+    <!-- Three.js & helpers from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/renderers/CSS2DRenderer.js"></script>
+
+    <script>
+    (() => {
+        // Hide loading screen when everything is ready
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+            }, 1000);
+        });
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf3f4f6);
+        scene.fog = new THREE.FogExp2(0xf3f4f6, 0.002);
+
+        const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 2000);
+        camera.position.set(0, 80, 180);
+
+        const renderer = new THREE.WebGLRenderer({antialias:true});
+        renderer.setSize(innerWidth, innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // Label renderer for slot text
+        const labelRenderer = new THREE.CSS2DRenderer();
+        labelRenderer.setSize(innerWidth, innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        document.body.appendChild(labelRenderer.domElement);
+
+        // Controls
+        const controls = new THREE.OrbitControls(camera, labelRenderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.minDistance = 40;
+        controls.maxDistance = 400;
+        controls.maxPolarAngle = Math.PI/2.1;
+
+        // Lights
+        const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.9);
+        hemi.position.set(0,200,0);
+        scene.add(hemi);
+
+        const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+        dir.position.set(-50,150,50);
+        dir.castShadow = true;
+        dir.shadow.mapSize.width = 2048;
+        dir.shadow.mapSize.height = 2048;
+        dir.shadow.camera.near = 0.5;
+        dir.shadow.camera.far = 500;
+        dir.shadow.camera.left = -100;
+        dir.shadow.camera.right = 100;
+        dir.shadow.camera.top = 100;
+        dir.shadow.camera.bottom = -100;
+        scene.add(dir);
+
+        // Ground
+        const groundGeo = new THREE.PlaneGeometry(500, 700);
+        const groundMat = new THREE.MeshStandardMaterial({
+            color: 0xe5e7eb,
+            roughness: 0.8,
+            metalness: 0.2
+        });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI/2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Add grid helper
+        const gridHelper = new THREE.GridHelper(500, 50, 0xcccccc, 0xcccccc);
+        gridHelper.position.y = 0.1;
+        scene.add(gridHelper);
+
+        // Helper groups
+        const slotsGroup = new THREE.Group();
+        scene.add(slotsGroup);
+
+        // Configuration: layout with roads between blocks
+        const ROWS = [
+            { type: 'ev', start:1, count:5 },
+            { type: 'road' },
+            { type: 'normal', start:6, count:5 },
+            { type: 'road' },
+            { type: 'ev', start:11, count:5 },
+            { type: 'road' },
+            { type: 'normal', start:16, count:5 }
+        ];
+
+        const slotWidth = 26, slotDepth = 45, gapX = 12, gapY = 22;
+        const cols = 5;
+        const totalRowWidth = cols*slotWidth + (cols-1)*gapX;
+        const startX = - totalRowWidth / 2 + slotWidth/2;
+
+        let currentRowZ = - (ROWS.length/2) * (slotDepth + gapY);
+
+        const slotMeshes = []; // for raycasting
+        const availableSlots = []; // track available slots
+
+        // Materials
+        const evMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x10b981,
+            emissive: 0x042f2e,
+            metalness: 0.3,
+            roughness: 0.4
+        });
+        
+        const normalMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x2563eb,
+            emissive: 0x172554,
+            metalness: 0.3,
+            roughness: 0.4
+        });
+        
+        const bookedMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xef4444,
+            emissive: 0x450a0a,
+            metalness: 0.3,
+            roughness: 0.4
+        });
+
+        ROWS.forEach((row, rIndex) => {
+            if(row.type === 'road'){
+                // draw a road rectangle (visual only)
+                const roadGeo = new THREE.PlaneGeometry(totalRowWidth + 40, slotDepth * 0.6);
+                const roadMat = new THREE.MeshStandardMaterial({
+                    color: 0x4b5563,
+                    roughness: 0.9,
+                    metalness: 0.1
+                });
+                const road = new THREE.Mesh(roadGeo, roadMat);
+                road.rotation.x = -Math.PI/2;
+                road.position.set(0, 0.1, currentRowZ);
+                road.receiveShadow = true;
+                scene.add(road);
+                
+                // lane markings
+                const stripeGeom = new THREE.PlaneGeometry(totalRowWidth * 0.8, 2);
+                const stripeMat = new THREE.MeshStandardMaterial({color:0xfffff0});
+                const stripe = new THREE.Mesh(stripeGeom, stripeMat);
+                stripe.rotation.x = -Math.PI/2;
+                stripe.position.set(0, 0.12, currentRowZ);
+                scene.add(stripe);
+                
+                currentRowZ += slotDepth + gapY;
+                return;
+            }
+
+            const {start, count, type} = row;
+            for(let c=0;c<cols;c++){
+                const slotIdx = start + c;
+                availableSlots.push(slotIdx);
+                
+                // create parking slot box
+                const h = 4;
+                const geometry = new THREE.BoxGeometry(slotWidth, h, slotDepth);
+                
+                let material = type === 'ev' ? evMaterial : normalMaterial;
+                const box = new THREE.Mesh(geometry, material);
+                box.castShadow = true;
+                box.receiveShadow = true;
+                const posX = startX + c * (slotWidth + gapX);
+                box.position.set(posX, h/2, currentRowZ);
+                slotsGroup.add(box);
+
+                // store metadata on mesh
+                box.userData = { 
+                    slot: slotIdx, 
+                    type: type,
+                    available: true
+                };
+
+                // label using CSS2D
+                const div = document.createElement('div');
+                div.className = 'label';
+                div.textContent = (type === 'ev' ? `EV ${slotIdx} ⚡` : `Slot ${slotIdx}`);
+                div.style.pointerEvents = 'none';
+                const label = new THREE.CSS2DObject(div);
+                label.position.set(0, h/1.0, 0);
+                box.add(label);
+
+                slotMeshes.push(box);
+            }
+            currentRowZ += slotDepth + gapY;
+        });
+
+        // Add some random parked cars (25% of slots)
+        const carModels = [
+            { color: 0x334155, scale: 0.8 },
+            { color: 0x6b7280, scale: 0.9 },
+            { color: 0x1e40af, scale: 0.85 },
+            { color: 0x991b1b, scale: 0.75 }
+        ];
+        
+        slotMeshes.forEach(slot => {
+            if(Math.random() < 0.25) {
+                const car = carModels[Math.floor(Math.random() * carModels.length)];
+                const carGeo = new THREE.BoxGeometry(
+                    slotWidth * 0.7 * car.scale, 
+                    3 * car.scale, 
+                    slotDepth * 0.6 * car.scale
+                );
+                const carMat = new THREE.MeshStandardMaterial({ 
+                    color: car.color,
+                    metalness: 0.4,
+                    roughness: 0.6
+                });
+                const carMesh = new THREE.Mesh(carGeo, carMat);
+                carMesh.castShadow = true;
+                carMesh.receiveShadow = true;
+                carMesh.position.set(
+                    slot.position.x,
+                    3 * car.scale / 2 + 2,
+                    slot.position.z
+                );
+                slotsGroup.add(carMesh);
+                
+                // Mark slot as unavailable
+                slot.userData.available = false;
+                const index = availableSlots.indexOf(slot.userData.slot);
+                if(index !== -1) {
+                    availableSlots.splice(index, 1);
+                }
+                
+                // Change slot color to booked
+                slot.material = bookedMaterial;
+            }
+        });
+
+        // Update stats display
+        document.getElementById('available-slots').textContent = availableSlots.length;
+        document.getElementById('ev-slots').textContent = ROWS.filter(r => r.type === 'ev').length * cols;
+
+        // Raycaster for clicks and hover
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let hovered = null;
+
+        function onPointerMove(event){
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+        }
+        
+        function onClick(event){
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(slotMeshes);
+            if(intersects.length>0){
+                const obj = intersects[0].object;
+                if(!obj.userData.available) {
+                    alert(`Slot ${obj.userData.slot} is already occupied. Please select another slot.`);
+                    return;
+                }
+                const { slot, type } = obj.userData;
+                // redirect to booking page with type param
+                const t = type === 'ev' ? 'ev' : 'normal';
+                window.location.href = `booking.html?slot=${slot}&type=${t}`;
+            }
+        }
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('click', onClick);
+
+        // animate hover highlight
+        function animateHover(){
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(slotMeshes);
+            if(intersects.length>0){
+                const obj = intersects[0].object;
+                if(hovered !== obj){
+                    if(hovered) {
+                        // Reset previous hovered object
+                        hovered.material.emissive.setHex(
+                            hovered.userData.type==='ev' ? 0x042f2e : 0x172554
+                        );
+                    }
+                    hovered = obj;
+                    // Highlight current hovered object
+                    hovered.material.emissive.setHex(0x555555);
+                    document.body.style.cursor = 'pointer';
+                }
+            } else {
+                if(hovered) {
+                    hovered.material.emissive.setHex(
+                        hovered.userData.type==='ev' ? 0x042f2e : 0x172554
+                    );
+                }
+                hovered = null;
+                document.body.style.cursor = 'auto';
+            }
+        }
+
+        // resize handling
+        window.addEventListener('resize', ()=> {
+            camera.aspect = innerWidth/innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(innerWidth, innerHeight);
+            labelRenderer.setSize(innerWidth, innerHeight);
+        });
+
+        // reset view
+        document.getElementById('resetView').addEventListener('click', (e)=>{
+            e.preventDefault();
+            camera.position.set(0,80,180); 
+            controls.target.set(0,0,0);
+        });
+
+        // animate loop
+        (function loop(){
+            requestAnimationFrame(loop);
+            controls.update();
+            animateHover();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        })();
+
+    })();
+    </script>
+</body>
+</html>
