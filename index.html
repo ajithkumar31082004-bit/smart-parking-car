@@ -1,302 +1,1392 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPark AI — Intelligent Cloud-Based Smart Parking Platform</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <title>SmartPark AI — Find. Book. Park. Charge.</title>
+    <meta name="description" content="AI-powered smart parking platform with real-time slot availability, EV charging reservations, dynamic pricing, and instant QR passes.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="/frontend/css/styles.css">
     <style>
-        .hero-section {
-            background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), 
-                        url('https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
-            padding: 5rem 5% 4rem;
-            color: white;
-            border-radius: var(--radius-lg);
-            margin-bottom: 2.5rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
-        }
-        .hero-title {
-            font-size: 3.2rem;
-            font-weight: 800;
-            line-height: 1.15;
-            margin-bottom: 1.25rem;
-            background: linear-gradient(135deg, #ffffff 40%, #93c5fd 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .hero-subtitle {
-            font-size: 1.25rem;
-            color: #cbd5e1;
-            max-width: 650px;
-            margin-bottom: 2rem;
-        }
-        .search-widget {
-            background: var(--bg-surface);
-            color: var(--text-main);
-            padding: 1.75rem;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            margin-top: 1.5rem;
-            border: 1px solid var(--border-color);
-        }
-        .stats-strip {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3.5rem;
-        }
-        .stat-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: var(--shadow-sm);
-        }
-        .stat-number {
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 0.25rem;
-        }
-        .stat-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-        .feature-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            transition: all var(--transition-normal);
-            border-top: 4px solid var(--primary);
-        }
-        .feature-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-lg);
-        }
-        .feature-icon-wrapper {
-            width: 54px;
-            height: 54px;
-            border-radius: var(--radius-md);
-            background: var(--primary-light);
-            color: var(--primary);
+        /* ── Hero ──────────────────────────────────────── */
+        .hero {
+            min-height: calc(100vh - var(--nav-height));
             display: flex;
             align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 4rem 1.5rem 3rem;
+        }
+
+        .hero-bg {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(37,99,235,0.28) 0%, transparent 60%),
+                        radial-gradient(ellipse 50% 40% at 90% 60%, rgba(99,102,241,0.18) 0%, transparent 55%),
+                        radial-gradient(ellipse 40% 50% at 10% 80%, rgba(6,182,212,0.12) 0%, transparent 55%),
+                        var(--bg-body);
+        }
+
+        /* Animated grid lines */
+        .hero-grid {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(37,99,235,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(37,99,235,0.06) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: radial-gradient(ellipse 80% 80% at center, black 30%, transparent 80%);
+            animation: gridShift 20s linear infinite;
+        }
+
+        @keyframes gridShift {
+            0%   { background-position: 0 0; }
+            100% { background-position: 48px 48px; }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes float {
+            0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0.4; }
+            50%  { opacity: 0.7; }
+            100% { transform: translateY(-80px) translateX(20px) scale(0.8); opacity: 0; }
+        }
+
+        .hero-content {
+            position: relative;
+            max-width: 1320px;
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 1rem;
+            background: rgba(99,102,241,0.12);
+            border: 1px solid rgba(99,102,241,0.25);
+            border-radius: var(--radius-full);
+            color: #a5b4fc;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-eyebrow span { 
+            width: 6px; height: 6px; 
+            background: var(--slot-ev); 
+            border-radius: 50%; 
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.3); }
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.6rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .hero-title .gradient-word {
+            background: linear-gradient(135deg, #60a5fa 0%, #818cf8 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            max-width: 480px;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-trust {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .trust-item i { color: var(--slot-available); font-size: 0.75rem; }
+
+        /* Right column: animated parking viz */
+        .hero-visual {
+            position: relative;
+            display: flex;
             justify-content: center;
-            font-size: 1.5rem;
+            align-items: center;
+        }
+
+        .parking-viz-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-xl), var(--shadow-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parking-viz-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: var(--accent-gradient);
+        }
+
+        .viz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1.25rem;
         }
-        .feature-icon-wrapper.green {
-            background: var(--ev-green-light);
-            color: var(--ev-green-dark);
+
+        .viz-title { font-weight: 700; font-size: 0.95rem; }
+        .live-dot {
+            display: flex; align-items: center; gap: 0.4rem;
+            font-size: 0.75rem; color: var(--slot-available);
+            font-weight: 600;
+        }
+        .live-dot::before {
+            content: '';
+            width: 7px; height: 7px;
+            background: var(--slot-available);
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .viz-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .viz-slot {
+            aspect-ratio: 3/4;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            transition: all 0.5s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .viz-slot i { font-size: 0.9rem; }
+        .viz-slot span { margin-top: 2px; }
+
+        .viz-slot.available { background: #d1fae5; color: #10b981; border: 2px solid #10b981; }
+        .viz-slot.occupied  { background: #fee2e2; color: #ef4444; border: 2px solid #ef4444; cursor: not-allowed; }
+        .viz-slot.reserved  { background: #fef3c7; color: #f59e0b; border: 2px solid #f59e0b; }
+        .viz-slot.ev        { background: #cffafe; color: #06b6d4; border: 2px solid #06b6d4; box-shadow: 0 0 10px rgba(6,182,212,0.3); }
+        [data-theme="dark"] .viz-slot.available { background: rgba(16,185,129,0.18); color: #34d399; border-color: #10b981; }
+        [data-theme="dark"] .viz-slot.occupied  { background: rgba(239,68,68,0.18);  color: #f87171; border-color: #ef4444; }
+        [data-theme="dark"] .viz-slot.reserved  { background: rgba(245,158,11,0.18); color: #fbbf24; border-color: #f59e0b; }
+        [data-theme="dark"] .viz-slot.ev        { background: rgba(6,182,212,0.18);  color: #22d3ee; border-color: #06b6d4; }
+
+        .viz-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .viz-stat {
+            text-align: center;
+        }
+        .viz-stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; }
+        .viz-stat-lbl { font-size: 0.6rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; }
+
+        /* AI Recommendation floating card */
+        .ai-float-card {
+            position: absolute;
+            bottom: -20px;
+            left: -30px;
+            background: var(--bg-card);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: var(--radius-lg);
+            padding: 0.9rem 1.1rem;
+            box-shadow: var(--shadow-xl);
+            font-size: 0.82rem;
+            max-width: 210px;
+            animation: floatCard 4s ease-in-out infinite;
+            z-index: 5;
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-8px); }
+        }
+
+        .ai-float-card .ai-label {
+            display: flex; align-items: center; gap: 0.4rem;
+            font-size: 0.7rem; font-weight: 700; color: var(--accent);
+            text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem;
+        }
+
+        .ai-float-card .rec-title { font-weight: 700; margin-bottom: 0.25rem; color: var(--text-main); }
+        .ai-float-card .rec-detail { color: var(--text-muted); font-size: 0.78rem; }
+
+        /* Pricing float card */
+        .price-float-card {
+            position: absolute;
+            top: -20px;
+            right: -30px;
+            background: var(--bg-card);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: var(--radius-lg);
+            padding: 0.9rem 1.1rem;
+            box-shadow: var(--shadow-xl);
+            font-size: 0.82rem;
+            max-width: 190px;
+            animation: floatCard 4s ease-in-out infinite 2s;
+            z-index: 5;
+        }
+
+        /* ── Search Box ──────────────────────────── */
+        .search-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem 2rem;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 3rem;
+        }
+
+        .search-box-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 0.85rem;
+            align-items: end;
+        }
+
+        /* ── Stats Section ──────────────────────── */
+        .stats-section {
+            padding: 4rem 1.5rem;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 0;
+        }
+
+        .stats-grid {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 0.4rem;
+        }
+
+        .stat-label {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* ── How It Works ─────────────────────── */
+        .how-section {
+            padding: 5rem 1.5rem;
+        }
+
+        .steps-row {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        .steps-row::before {
+            content: '';
+            position: absolute;
+            top: 32px;
+            left: calc(12.5% + 24px);
+            right: calc(12.5% + 24px);
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--slot-ev));
+        }
+
+        .step-card {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-icon {
+            width: 64px; height: 64px;
+            border-radius: var(--radius-full);
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            margin: 0 auto 1rem;
+            position: relative;
+            z-index: 1;
+            transition: all var(--transition-normal);
+        }
+
+        .step-card:hover .step-icon {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: var(--shadow-glow);
+            transform: scale(1.1);
+        }
+
+        .step-num {
+            position: absolute;
+            top: -8px; right: -8px;
+            width: 22px; height: 22px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .step-title { font-weight: 700; margin-bottom: 0.4rem; font-size: 0.95rem; }
+        .step-desc { font-size: 0.83rem; color: var(--text-muted); line-height: 1.5; }
+
+        /* ── Feature Showcase ─────────────────── */
+        .features-section { padding: 5rem 1.5rem; background: var(--bg-surface); border-top: 1px solid var(--border-color); }
+
+        .feature-grid {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+            background: var(--accent-gradient);
+            transform: scaleX(0);
+            transition: transform var(--transition-normal);
+            transform-origin: left;
+        }
+
+        .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .feature-card:hover::after { transform: scaleX(1); }
+
+        .feature-icon {
+            width: 52px; height: 52px;
+            border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-icon.blue { background: var(--primary-light); color: var(--primary); }
+        .feature-icon.green { background: var(--slot-available-bg); color: var(--slot-available); }
+        .feature-icon.cyan { background: var(--slot-ev-bg); color: var(--slot-ev); }
+        .feature-icon.purple { background: rgba(99,102,241,0.12); color: var(--accent); }
+        .feature-icon.amber { background: var(--warning-light); color: var(--warning); }
+        .feature-icon.red { background: var(--slot-occupied-bg); color: var(--slot-occupied); }
+
+        .feature-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .feature-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
+
+        /* ── AI Showcase ──────────────────────── */
+        .ai-section { padding: 5rem 1.5rem; }
+
+        .ai-demo-card {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1.5px solid rgba(99,102,241,0.25);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .ai-demo-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-bot-icon {
+            width: 44px; height: 44px;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .ai-results { display: flex; flex-direction: column; gap: 1rem; }
+
+        .ai-result-item {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            transition: all var(--transition-normal);
+        }
+
+        .ai-result-item:first-child {
+            border-color: var(--accent);
+            background: rgba(99,102,241,0.04);
+        }
+
+        .ai-result-item:hover { transform: translateX(4px); }
+
+        .ai-rank {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--border-color);
+            min-width: 28px;
+        }
+        .ai-result-item:first-child .ai-rank { color: var(--accent); }
+
+        .ai-result-info { flex: 1; }
+        .ai-result-name { font-weight: 700; margin-bottom: 0.25rem; }
+        .ai-result-meta { font-size: 0.82rem; color: var(--text-muted); display: flex; gap: 1rem; flex-wrap: wrap; }
+        .ai-result-meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+        .ai-result-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.6rem; }
+        .ai-pill {
+            padding: 0.2rem 0.6rem;
+            border-radius: var(--radius-full);
+            font-size: 0.72rem;
+            font-weight: 600;
+            background: var(--slot-available-bg);
+            color: var(--slot-available);
+        }
+        .ai-pill.neutral { background: var(--primary-light); color: var(--primary); }
+
+        .ai-match-score {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .ai-pct {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .ai-pct-label { font-size: 0.72rem; color: var(--text-muted); }
+
+        /* ── EV Section ───────────────────────── */
+        .ev-section {
+            padding: 5rem 1.5rem;
+            background: linear-gradient(135deg, rgba(6,182,212,0.06) 0%, rgba(16,185,129,0.06) 100%);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ev-demo {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .ev-charger-card {
+            background: var(--bg-card);
+            border: 1.5px solid rgba(6,182,212,0.3);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-ev);
+        }
+
+        .ev-header {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin-bottom: 1.5rem; padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .ev-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #06b6d4, #10b981);
+            border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.3rem;
+        }
+
+        .ev-stat-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .ev-stat-item {
+            background: var(--bg-body);
+            border-radius: var(--radius-md);
+            padding: 0.9rem;
+            text-align: center;
+        }
+        .ev-stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--slot-ev); }
+        .ev-stat-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+        .ev-cost-breakdown {
+            background: var(--bg-body);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .ev-cost-row { display: flex; justify-content: space-between; font-size: 0.88rem; padding: 0.3rem 0; }
+        .ev-cost-row.total { font-weight: 700; border-top: 1px solid var(--border-color); padding-top: 0.6rem; margin-top: 0.3rem; font-size: 1rem; }
+
+        /* ── Pricing Section ──────────────────── */
+        .pricing-section { padding: 5rem 1.5rem; }
+
+        .pricing-demo {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .demand-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--warning-light);
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+        [data-theme="dark"] .demand-indicator { background: rgba(245,158,11,0.12); }
+        .demand-indicator i { color: var(--warning); font-size: 1rem; }
+        .demand-indicator strong { color: var(--warning); }
+
+        /* ── Testimonials ─────────────────────── */
+        .testimonials-section { padding: 5rem 1.5rem; background: var(--bg-surface); border-top: 1px solid var(--border-color); }
+
+        .testimonial-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            transition: all var(--transition-normal);
+        }
+        .testimonial-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+        .testimonial-stars { color: #fbbf24; margin-bottom: 1rem; font-size: 0.9rem; }
+        .testimonial-text { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.25rem; font-style: italic; }
+
+        .testimonial-author { display: flex; align-items: center; gap: 0.75rem; }
+        .author-avatar {
+            width: 38px; height: 38px;
+            border-radius: var(--radius-full);
+            background: var(--accent-gradient);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 700; font-size: 0.88rem;
+        }
+        .author-name { font-weight: 700; font-size: 0.88rem; }
+        .author-role { font-size: 0.78rem; color: var(--text-muted); }
+
+        /* ── CTA Section ──────────────────────── */
+        .cta-section {
+            padding: 5rem 1.5rem;
+            text-align: center;
+            background: radial-gradient(ellipse 70% 80% at center, rgba(37,99,235,0.1) 0%, transparent 70%);
+        }
+        .cta-title { font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
+        .cta-desc { color: var(--text-muted); font-size: 1.05rem; max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.7; }
+
+        /* ── Smart Insights Banner ─────────────── */
+        .insight-banner {
+            max-width: 1320px;
+            margin: 0 auto 0;
+            background: linear-gradient(135deg, rgba(37,99,235,0.08), rgba(99,102,241,0.08));
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: var(--radius-xl);
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .insight-icon {
+            width: 42px; height: 42px;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.1rem; flex-shrink: 0;
+        }
+
+        .insight-text { flex: 1; }
+        .insight-text strong { color: var(--text-main); }
+        .insight-text p { font-size: 0.9rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-content { grid-template-columns: 1fr; gap: 3rem; }
+            .hero-visual { display: none; }
+            .search-row { grid-template-columns: 1fr 1fr; }
+            .search-row .btn { grid-column: 1/-1; }
+            .steps-row { grid-template-columns: repeat(2, 1fr); }
+            .steps-row::before { display: none; }
+            .feature-grid { grid-template-columns: repeat(2, 1fr); }
+            .ev-demo { grid-template-columns: 1fr; }
+            .pricing-demo { grid-template-columns: 1fr; }
+            .testimonial-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .hero { min-height: auto; padding: 3rem 1rem 2rem; }
+            .hero-title { font-size: 2.2rem; }
+            .hero-cta-group { flex-direction: column; }
+            .search-row { grid-template-columns: 1fr; }
+            .steps-row { grid-template-columns: 1fr; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .cta-title { font-size: 1.9rem; }
+            .insight-banner { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Header -->
-    <header class="app-header">
+    <!-- Navigation -->
+    <header class="app-header" id="appHeader">
         <div class="header-container">
             <a href="/index.html" class="brand-logo">
-                <i class="fas fa-car-side"></i>
-                <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
+                <i class="fas fa-square-parking"></i>
+                SmartPark<span>AI</span>
             </a>
             <nav class="nav-links" id="dynamic-nav-links">
-                <!-- Injected by auth.js -->
+                <a href="/find-parking.html"><i class="fas fa-search-location"></i> Find Parking</a>
+                <a href="/slots.html"><i class="fas fa-th-large"></i> Live Slots</a>
+                <a href="/dashboard.html"><i class="fas fa-gauge-high"></i> Dashboard</a>
+                <a href="/launch 3d demo.html"><i class="fas fa-cube"></i> 3D Demo</a>
             </nav>
             <div class="nav-actions">
-                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme">
-                    <i class="fas fa-moon theme-icon"></i>
+                <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
                 </button>
                 <div id="nav-auth-actions"></div>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="main-wrapper">
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <span class="badge badge-ai" style="margin-bottom: 1rem;"><i class="fas fa-sparkles"></i> AI-Powered Smart Parking Cloud</span>
-            <h1 class="hero-title">Find & Reserve Your Perfect Parking Spot in Real Time</h1>
-            <p class="hero-subtitle">Intelligent IoT slot tracking, predictive occupancy forecasting, fast EV charging reservations, and frictionless QR-pass check-ins.</p>
+    <!-- Bottom Mobile Nav -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-inner">
+            <a href="/index.html" class="bottom-nav-item active">
+                <i class="fas fa-house"></i><span>Home</span>
+            </a>
+            <a href="/find-parking.html" class="bottom-nav-item">
+                <i class="fas fa-search-location"></i><span>Find</span>
+            </a>
+            <a href="/dashboard.html" class="bottom-nav-item">
+                <i class="fas fa-ticket"></i><span>My Passes</span>
+            </a>
+            <a href="/login.html" class="bottom-nav-item" id="mobileAuthLink">
+                <i class="fas fa-user-circle"></i><span>Account</span>
+            </a>
+        </div>
+    </nav>
 
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a href="/find-parking.html" class="btn btn-primary btn-lg"><i class="fas fa-search-location"></i> Find Parking Now</a>
-                <a href="/slots.html" class="btn btn-success btn-lg"><i class="fas fa-th"></i> View Live Slot Matrix</a>
-                <a href="/launch 3d demo.html" class="btn btn-secondary btn-lg"><i class="fas fa-cube"></i> Launch 3D Simulation</a>
-            </div>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
-            <!-- Instant Search Box -->
-            <div class="search-widget">
-                <form id="heroSearchForm" onsubmit="handleHeroSearch(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 140px; gap: 1rem; align-items: end;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> Destination</label>
-                        <select class="form-control" id="searchLocation">
-                            <option value="1">Downtown Metro Smart Deck</option>
-                            <option value="2">Silicon Tech Park Multi-Level Hub</option>
-                            <option value="3">Grand Central Mall Parking</option>
-                            <option value="4">Airport Terminal T3 Express Deck</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label"><i class="fas fa-car" style="color:var(--primary)"></i> Vehicle Type</label>
-                        <select class="form-control" id="searchVehicleType">
-                            <option value="car">Car / Sedan</option>
-                            <option value="suv">SUV</option>
-                            <option value="bike">Bike / Two-Wheeler</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label"><i class="fas fa-bolt" style="color:var(--ev-green)"></i> EV Charging</label>
-                        <select class="form-control" id="searchEv">
-                            <option value="true">Required (EV Fast Charger)</option>
-                            <option value="false">Not Required (Normal Slot)</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="height: 44px;"><i class="fas fa-search"></i> Search</button>
-                </form>
-            </div>
-        </section>
+    <!-- ── HERO ────────────────────────────────────────── -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-grid"></div>
+        <!-- Floating particles (rendered by JS) -->
+        <div id="particles"></div>
 
-        <!-- Live Platform Stats (Fetched Dynamically) -->
-        <section class="stats-strip" id="statsContainer">
-            <div class="stat-card">
-                <div class="stat-number" id="kpiTotalSlots">120+</div>
-                <div class="stat-label">Total Parking Slots</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="kpiAvailableSlots" style="color:var(--ev-green);">84</div>
-                <div class="stat-label">Live Available Spots</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="kpiEvChargers" style="color:var(--accent);">24+</div>
-                <div class="stat-label">EV Fast Chargers</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="kpiOccupancy">99.8%</div>
-                <div class="stat-label">Availability Tracking</div>
-            </div>
-        </section>
-
-        <!-- Core Feature Pillars -->
-        <section style="margin-bottom: 4rem;">
-            <div style="text-align: center; margin-bottom: 2.5rem;">
-                <span class="badge badge-primary">Enterprise Capabilities</span>
-                <h2 style="font-size: 2.2rem; font-weight: 800; margin-top: 0.5rem;">Engineered for Seamless Mobility</h2>
-                <p style="color: var(--text-muted); max-width: 600px; margin: 0.5rem auto 0;">Next-generation cloud infrastructure uniting IoT hardware, predictive AI models, and frictionless contactless payments.</p>
-            </div>
-
-            <div class="grid-3">
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper"><i class="fas fa-satellite-dish"></i></div>
-                    <h3 style="margin-bottom: 0.5rem;">Real-Time IoT Availability</h3>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Sub-second slot state sync across ultrasonic and camera sensors prevents gate congestion and eliminates parking search time.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper green"><i class="fas fa-charging-station"></i></div>
-                    <h3 style="margin-bottom: 0.5rem;">EV Fast-Charging Hub</h3>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Reserve dedicated Level 2 and DC Fast Chargers (up to 60 kW) alongside your slot with real-time kWh and battery tracking.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper"><i class="fas fa-brain"></i></div>
-                    <h3 style="margin-bottom: 0.5rem;">AI Recommendation Engine</h3>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Multi-criteria weighted matching algorithms rank parking decks by distance, pricing, vehicle dimensions, and live capacity.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper"><i class="fas fa-qrcode"></i></div>
-                    <h3 style="margin-bottom: 0.5rem;">Instant QR Digital Pass</h3>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Automated tamper-proof QR code generation for 2-second touchless gate validation, check-in, and instant digital invoicing.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper"><i class="fas fa-chart-line"></i></div>
-                    <h3 style="margin-bottom: 0.5rem;">Dynamic Surge Pricing</h3>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Automated occupancy tier multipliers optimize municipal revenue during peak hours while offering budget off-peak rates.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrapper"><i class="fas fa-shield-alt"></i></div>
-                    <h3 style="margin-bottom: 0.5rem;">Anomaly & Fraud Protection</h3>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Multi-layer risk scoring detects rapid multi-booking spikes, bot hoarding, and payment inconsistencies in real-time.</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="app-footer">
-        <div class="footer-content">
+        <div class="hero-content">
+            <!-- Left: Text + CTA -->
             <div>
-                <a href="/index.html" class="brand-logo" style="margin-bottom: 0.75rem; display: inline-flex;">
-                    <i class="fas fa-car-side"></i>
-                    <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
-                </a>
-                <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 320px;">
-                    Cloud-native intelligent parking management platform built with AI recommendations, IoT sensor synchronization, and high-speed QR gate verification.
+                <div class="hero-eyebrow">
+                    <span></span>
+                    AI-Powered Smart Parking Platform
+                </div>
+                <h1 class="hero-title">
+                    Find. Book. <span class="gradient-word">Park.</span> Charge.
+                </h1>
+                <p class="hero-sub">
+                    Real-time slot availability, explainable AI recommendations, dynamic surge pricing, and instant QR gate passes — all in one platform.
                 </p>
-            </div>
-            <div>
-                <h4 style="font-weight: 700; margin-bottom: 1rem;">Platform</h4>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
-                    <a href="/find-parking.html">Find Parking</a>
-                    <a href="/slots.html">Live Slot Matrix</a>
-                    <a href="/launch 3d demo.html">3D Lot Simulation</a>
-                    <a href="/dashboard.html">Customer Portal</a>
+                <div class="hero-cta-group">
+                    <a href="/find-parking.html" class="btn btn-gradient btn-lg">
+                        <i class="fas fa-search-location"></i> Find Parking Now
+                    </a>
+                    <a href="/signup.html" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-user-plus"></i> Get Started Free
+                    </a>
+                </div>
+                <div class="hero-trust">
+                    <span class="trust-item"><i class="fas fa-check-circle"></i> Free to use</span>
+                    <span class="trust-item"><i class="fas fa-check-circle"></i> EV charging included</span>
+                    <span class="trust-item"><i class="fas fa-check-circle"></i> Instant QR pass</span>
                 </div>
             </div>
-            <div>
-                <h4 style="font-weight: 700; margin-bottom: 1rem;">Staff & Admin</h4>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
-                    <a href="/staff-scanner.html">Gate QR Scanner</a>
-                    <a href="/admin.html">Executive Analytics</a>
-                    <a href="/api/health" target="_blank">System Health</a>
+
+            <!-- Right: Animated parking visualization -->
+            <div class="hero-visual">
+                <div class="ai-float-card">
+                    <div class="ai-label"><i class="fas fa-robot"></i> AI Recommended</div>
+                    <div class="rec-title">Downtown Metro · Slot B14</div>
+                    <div class="rec-detail">95% match · ⚡ Fast Charger · ₹40/hr</div>
                 </div>
-            </div>
-            <div>
-                <h4 style="font-weight: 700; margin-bottom: 1rem;">Technology</h4>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">
-                    <span>Node.js / Express REST</span>
-                    <span>SQLite Relational DB</span>
-                    <span>Python ML Forecasting</span>
-                    <span>Docker & AWS Ready</span>
+
+                <div class="parking-viz-card">
+                    <div class="viz-header">
+                        <span class="viz-title"><i class="fas fa-square-parking" style="color:var(--primary)"></i> Live Parking — Floor 1</span>
+                        <span class="live-dot">Live</span>
+                    </div>
+
+                    <div style="font-size:0.7rem;color:var(--text-muted);text-align:center;padding:0.4rem;background:var(--bg-body);border-radius:var(--radius-sm);margin-bottom:0.75rem;font-weight:600;letter-spacing:0.08em;">▼ ENTRY</div>
+
+                    <div class="viz-grid" id="heroVizGrid"></div>
+
+                    <div style="font-size:0.7rem;color:var(--text-muted);text-align:center;padding:0.4rem;background:var(--bg-body);border-radius:var(--radius-sm);margin-top:0.25rem;font-weight:600;letter-spacing:0.08em;">▲ EXIT</div>
+
+                    <div class="viz-stats">
+                        <div class="viz-stat">
+                            <div class="viz-stat-num text-success" id="vizAvail">—</div>
+                            <div class="viz-stat-lbl">Open</div>
+                        </div>
+                        <div class="viz-stat">
+                            <div class="viz-stat-num text-danger" id="vizOcc">—</div>
+                            <div class="viz-stat-lbl">Busy</div>
+                        </div>
+                        <div class="viz-stat">
+                            <div class="viz-stat-num text-ev" id="vizEv">—</div>
+                            <div class="viz-stat-lbl">EV</div>
+                        </div>
+                        <div class="viz-stat">
+                            <div class="viz-stat-num text-warning" id="vizRes">—</div>
+                            <div class="viz-stat-lbl">Reserved</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="price-float-card">
+                    <div style="font-size:0.7rem;font-weight:700;color:var(--slot-available);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">💰 Best Price Now</div>
+                    <div style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:800;color:var(--text-main);">₹40<span style="font-size:0.75rem;font-weight:500;color:var(--text-muted)">/hr</span></div>
+                    <div style="font-size:0.75rem;color:var(--slot-available);margin-top:2px;">↓ 33% off peak</div>
                 </div>
             </div>
         </div>
-        <div class="footer-bottom">
+    </section>
+
+    <!-- ── SEARCH BOX ──────────────────────────────────── -->
+    <div style="max-width:1320px;margin:0 auto;padding:0 1.5rem;">
+        <div class="search-box">
+            <div class="search-box-title"><i class="fas fa-search-location" style="color:var(--primary)"></i> Quick Search</div>
+            <form class="search-row" id="heroSearchForm" onsubmit="handleHeroSearch(event)">
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">📍 Location</label>
+                    <select class="form-control" id="searchLocation">
+                        <option value="1">Downtown Metro Smart Deck</option>
+                        <option value="2">Silicon Tech Park Multi-Level</option>
+                        <option value="3">Grand Central Mall Parking</option>
+                        <option value="4">Airport Terminal T3 Express</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">🚗 Vehicle Type</label>
+                    <select class="form-control" id="searchVehicleType">
+                        <option value="car">Car / Sedan</option>
+                        <option value="suv">SUV</option>
+                        <option value="bike">Bike / Two-Wheeler</option>
+                        <option value="ev">EV (Electric)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">⚡ EV Charging</label>
+                    <select class="form-control" id="searchEv">
+                        <option value="false">Not Required</option>
+                        <option value="true">Required (Fast Charger)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Smart Insight Banner -->
+        <div class="insight-banner">
+            <div class="insight-icon"><i class="fas fa-lightbulb"></i></div>
+            <div class="insight-text">
+                <strong>💡 SmartPark AI Insight</strong>
+                <p>Parking demand is forecast to reach <strong>92% occupancy</strong> between 7:00–9:00 PM tonight. We recommend arriving before 6:45 PM to save up to ₹30.</p>
+            </div>
+            <a href="/find-parking.html" class="btn btn-primary btn-sm" style="flex-shrink:0">Book Early →</a>
+        </div>
+    </div>
+
+    <!-- ── STATS ─────────────────────────────────────────── -->
+    <section class="stats-section" style="margin-top:3rem;">
+        <div class="stats-grid">
+            <div>
+                <div class="stat-number" id="statSessions">10,000+</div>
+                <div class="stat-label">Parking Sessions</div>
+            </div>
+            <div>
+                <div class="stat-number" id="statSlots">120+</div>
+                <div class="stat-label">Smart Parking Slots</div>
+            </div>
+            <div>
+                <div class="stat-number" id="statEv">24+</div>
+                <div class="stat-label">EV Fast Chargers</div>
+            </div>
+            <div>
+                <div class="stat-number">98%</div>
+                <div class="stat-label">Booking Success Rate</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── HOW IT WORKS ──────────────────────────────────── -->
+    <section class="how-section">
+        <div class="section-header">
+            <div class="section-eyebrow"><i class="fas fa-route"></i> Simple Process</div>
+            <h2 class="section-title">Park in 4 Easy Steps</h2>
+            <p class="section-desc">From search to parked car in under 2 minutes.</p>
+        </div>
+        <div class="steps-row">
+            <div class="step-card">
+                <div class="step-icon">
+                    <span class="step-num">1</span>
+                    <i class="fas fa-search-location"></i>
+                </div>
+                <div class="step-title">Search & Discover</div>
+                <div class="step-desc">Enter your destination. AI finds the best parking options near you in real time.</div>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <span class="step-num">2</span>
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="step-title">AI Recommends</div>
+                <div class="step-desc">Our algorithm ranks slots by proximity, price, EV availability, and occupancy forecast.</div>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <span class="step-num">3</span>
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="step-title">Book & Pay</div>
+                <div class="step-desc">Reserve your slot instantly. Pay via UPI, card, or net banking. Get your digital QR pass.</div>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <span class="step-num">4</span>
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <div class="step-title">Scan & Park</div>
+                <div class="step-desc">Show your QR pass at the gate. 2-second optical scan — barrier opens automatically.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── AI RECOMMENDATION SHOWCASE ─────────────────── -->
+    <section class="ai-section">
+        <div class="section-header">
+            <div class="section-eyebrow"><i class="fas fa-brain"></i> Explainable AI</div>
+            <h2 class="section-title">AI That Shows Its Work</h2>
+            <p class="section-desc">Unlike black-box algorithms, SmartPark AI explains exactly why it recommends each location.</p>
+        </div>
+        <div class="ai-demo-card">
+            <div class="ai-demo-header">
+                <div class="ai-bot-icon"><i class="fas fa-robot"></i></div>
+                <div>
+                    <div style="font-weight:700">AI Parking Recommendations</div>
+                    <div style="font-size:0.8rem;color:var(--text-muted)">Based on your location, vehicle type, and budget</div>
+                </div>
+                <span class="badge badge-ai" style="margin-left:auto"><i class="fas fa-sparkles"></i> AI-Powered</span>
+            </div>
+            <div class="ai-results">
+                <div class="ai-result-item">
+                    <div class="ai-rank">#1</div>
+                    <div class="ai-result-info">
+                        <div class="ai-result-name">Downtown Metro Smart Deck <span class="badge badge-primary" style="font-size:0.7rem;margin-left:0.4rem">Recommended</span></div>
+                        <div class="ai-result-meta">
+                            <span><i class="fas fa-map-marker-alt"></i> 120m away</span>
+                            <span><i class="fas fa-rupee-sign"></i> ₹40/hr</span>
+                            <span><i class="fas fa-charging-station"></i> 8 EV chargers</span>
+                            <span><i class="fas fa-star" style="color:#fbbf24"></i> 4.9</span>
+                        </div>
+                        <div class="ai-result-pills">
+                            <span class="ai-pill">✓ Closest to you</span>
+                            <span class="ai-pill">✓ Budget-friendly</span>
+                            <span class="ai-pill">✓ EV Fast Charger</span>
+                            <span class="ai-pill neutral">↓ Low congestion</span>
+                        </div>
+                    </div>
+                    <div class="ai-match-score">
+                        <div class="ai-pct">95%</div>
+                        <div class="ai-pct-label">AI Match</div>
+                    </div>
+                </div>
+                <div class="ai-result-item">
+                    <div class="ai-rank">#2</div>
+                    <div class="ai-result-info">
+                        <div class="ai-result-name">Silicon Tech Park Hub</div>
+                        <div class="ai-result-meta">
+                            <span><i class="fas fa-map-marker-alt"></i> 680m away</span>
+                            <span><i class="fas fa-rupee-sign"></i> ₹35/hr</span>
+                            <span><i class="fas fa-charging-station"></i> 12 EV chargers</span>
+                            <span><i class="fas fa-star" style="color:#fbbf24"></i> 4.7</span>
+                        </div>
+                        <div class="ai-result-pills">
+                            <span class="ai-pill">✓ More EV slots</span>
+                            <span class="ai-pill">✓ Cheapest option</span>
+                        </div>
+                    </div>
+                    <div class="ai-match-score">
+                        <div class="ai-pct" style="color:var(--text-muted)">78%</div>
+                        <div class="ai-pct-label">AI Match</div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:1.5rem;">
+                <a href="/find-parking.html" class="btn btn-gradient"><i class="fas fa-search-location"></i> Get My AI Recommendations</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── EV CHARGING SECTION ────────────────────────── -->
+    <section class="ev-section">
+        <div class="ev-demo">
+            <div>
+                <div class="section-eyebrow" style="margin-bottom:1rem"><i class="fas fa-charging-station"></i> EV Charging</div>
+                <h2 class="section-title" style="text-align:left">Reserve Your EV Charger with Your Slot</h2>
+                <p style="color:var(--text-muted);margin-bottom:2rem;line-height:1.7">Book your parking and EV charging simultaneously. Track charging progress, get cost estimates, and receive a notification when your car is ready.</p>
+                <div class="flex gap-3 flex-wrap">
+                    <div class="flex items-center gap-2 text-sm"><i class="fas fa-bolt text-ev"></i> Type 2 &amp; CCS2 chargers</div>
+                    <div class="flex items-center gap-2 text-sm"><i class="fas fa-bolt text-ev"></i> Up to 60 kW DC fast charge</div>
+                    <div class="flex items-center gap-2 text-sm"><i class="fas fa-bolt text-ev"></i> Real-time kWh tracking</div>
+                </div>
+            </div>
+            <div class="ev-charger-card">
+                <div class="ev-header">
+                    <div class="ev-icon"><i class="fas fa-charging-station"></i></div>
+                    <div>
+                        <div style="font-weight:700;font-size:1rem">EV Charging — Slot B14</div>
+                        <div class="badge badge-ev">CCS2 · 60 kW Fast Charger</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;padding:0.6rem 0.85rem;background:var(--slot-available-bg);border-radius:var(--radius-md);">
+                    <span style="font-size:0.75rem;font-weight:700;color:var(--slot-available)">⚡ 8 of 12 chargers available now</span>
+                </div>
+                <div class="ev-stat-row">
+                    <div class="ev-stat-item">
+                        <div class="ev-stat-val">60 kW</div>
+                        <div class="ev-stat-lbl">Power</div>
+                    </div>
+                    <div class="ev-stat-item">
+                        <div class="ev-stat-val">35 min</div>
+                        <div class="ev-stat-lbl">Est. Charge Time</div>
+                    </div>
+                </div>
+                <div class="ev-cost-breakdown">
+                    <div class="ev-cost-row"><span>Parking (2 hrs)</span><span>₹80</span></div>
+                    <div class="ev-cost-row"><span>EV Charging (35 kWh)</span><span>₹140</span></div>
+                    <div class="ev-cost-row"><span>GST (18%)</span><span>₹39.60</span></div>
+                    <div class="ev-cost-row total"><span>Total Estimate</span><span style="color:var(--slot-ev)">₹259.60</span></div>
+                </div>
+                <a href="/find-parking.html?isEv=true" class="btn btn-ev btn-block">
+                    <i class="fas fa-charging-station"></i> Reserve EV Charger
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── DYNAMIC PRICING SECTION ───────────────────── -->
+    <section class="pricing-section">
+        <div class="section-header">
+            <div class="section-eyebrow"><i class="fas fa-chart-line"></i> Smart Pricing</div>
+            <h2 class="section-title">Know the Price Before You Park</h2>
+            <p class="section-desc">Dynamic pricing adjusts based on demand. See exactly why prices change and when the best time to park is.</p>
+        </div>
+        <div class="pricing-demo">
+            <div class="price-card">
+                <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem">Current Price</div>
+                <div style="display:flex;align-items:baseline;gap:0.35rem;margin-bottom:0.75rem">
+                    <div class="price-current">₹60</div>
+                    <div style="color:var(--text-muted);font-size:0.9rem">/hour</div>
+                </div>
+                <div class="demand-indicator">
+                    <i class="fas fa-fire"></i>
+                    <span>High demand — <strong>Occupancy: 87%</strong></span>
+                </div>
+                <div class="price-breakdown">
+                    <div class="price-row"><span>Base rate</span><span>₹40</span></div>
+                    <div class="price-row surge"><span>🔥 Demand surcharge</span><span>+₹20</span></div>
+                    <div class="price-row total"><span>You pay</span><span>₹60/hr</span></div>
+                </div>
+                <div class="demand-bar-wrap">
+                    <div class="demand-label"><span>Occupancy</span><span style="font-weight:700;color:var(--slot-occupied)">87%</span></div>
+                    <div class="demand-bar-track"><div class="demand-bar-fill high" style="width:87%"></div></div>
+                </div>
+            </div>
+            <div class="price-card">
+                <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1rem">Price Forecast</div>
+                <div class="price-timeline" style="grid-template-columns:repeat(4,1fr)">
+                    <div class="price-time-cell now"><div class="time">Now</div><div class="price">₹60</div></div>
+                    <div class="price-time-cell"><div class="time">8 PM</div><div class="price" style="color:var(--slot-occupied)">₹70</div></div>
+                    <div class="price-time-cell"><div class="time">9 PM</div><div class="price" style="color:var(--warning)">₹50</div></div>
+                    <div class="price-time-cell"><div class="time">10 PM</div><div class="price" style="color:var(--slot-available)">₹40</div></div>
+                </div>
+                <div style="padding:1rem;background:var(--slot-available-bg);border-radius:var(--radius-md);margin-top:1rem;font-size:0.85rem;">
+                    <i class="fas fa-lightbulb" style="color:var(--slot-available)"></i>
+                    <strong style="color:var(--ev-green-dark)"> Book after 10 PM</strong> to get base rate ₹40/hr — save ₹20 per hour.
+                </div>
+                <a href="/find-parking.html" class="btn btn-primary btn-block" style="margin-top:1rem">
+                    <i class="fas fa-calendar-check"></i> View Full Price Forecast
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FEATURES GRID ──────────────────────────────── -->
+    <section class="features-section">
+        <div style="text-align:center;margin-bottom:3rem">
+            <div class="section-eyebrow"><i class="fas fa-star"></i> Platform Features</div>
+            <h2 class="section-title">Everything You Need to Park Smarter</h2>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon blue"><i class="fas fa-satellite-dish"></i></div>
+                <div class="feature-title">Real-Time IoT Availability</div>
+                <div class="feature-desc">Sub-second slot state sync from ultrasonic and camera sensors. Zero guessing — every slot status is live.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon green"><i class="fas fa-charging-station"></i></div>
+                <div class="feature-title">EV Fast-Charging Hub</div>
+                <div class="feature-desc">Reserve dedicated Level 2 and DC fast chargers (up to 60 kW) simultaneously with your parking slot.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple"><i class="fas fa-brain"></i></div>
+                <div class="feature-title">Explainable AI Engine</div>
+                <div class="feature-desc">Multi-criteria scoring ranks slots by distance, price, EV availability, and occupancy — with full reasoning shown.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan"><i class="fas fa-qrcode"></i></div>
+                <div class="feature-title">Instant QR Digital Pass</div>
+                <div class="feature-desc">Tamper-proof 2D barcode generated instantly after payment. 2-second touchless gate entry and exit.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon amber"><i class="fas fa-chart-line"></i></div>
+                <div class="feature-title">Dynamic Surge Pricing</div>
+                <div class="feature-desc">Occupancy tier multipliers (1×–1.8×) optimize revenue during peak hours while offering budget off-peak rates.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon red"><i class="fas fa-shield-alt"></i></div>
+                <div class="feature-title">Fraud & Anomaly Detection</div>
+                <div class="feature-desc">Multi-layer risk scoring detects booking spikes, bot hoarding, and payment anomalies in real time.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── TESTIMONIALS ───────────────────────────────── -->
+    <section class="testimonials-section">
+        <div style="text-align:center;margin-bottom:3rem">
+            <div class="section-eyebrow"><i class="fas fa-comments"></i> Customer Reviews</div>
+            <h2 class="section-title">Loved by Drivers</h2>
+        </div>
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <div class="testimonial-text">"The AI recommendation was spot on — found me the closest EV charger at the best price. I booked in literally 30 seconds. Way better than circling for 20 minutes."</div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">PK</div>
+                    <div>
+                        <div class="author-name">Priya Krishnamurthy</div>
+                        <div class="author-role">EV Owner · Chennai</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <div class="testimonial-text">"The QR pass system is brilliant. I just held my phone up at the gate and it opened. No fumbling, no ticket counter. This is what parking should feel like in 2026."</div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">RS</div>
+                    <div>
+                        <div class="author-name">Rahul Sharma</div>
+                        <div class="author-role">Daily Commuter · Bangalore</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★☆</div>
+                <div class="testimonial-text">"The price forecast saved me ₹40 — I waited 30 minutes for the off-peak rate and the app told me exactly when to book. Smart system, genuinely useful."</div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">AM</div>
+                    <div>
+                        <div class="author-name">Aditya Menon</div>
+                        <div class="author-role">Weekend Driver · Hyderabad</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── CTA ────────────────────────────────────────── -->
+    <section class="cta-section">
+        <div class="section-eyebrow" style="margin-bottom:1rem"><i class="fas fa-rocket"></i> Get Started</div>
+        <h2 class="cta-title">Ready to Park Smarter?</h2>
+        <p class="cta-desc">Join thousands of drivers using AI to find the best parking spot in seconds. Free to sign up — no credit card required.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+            <a href="/signup.html" class="btn btn-gradient btn-lg"><i class="fas fa-user-plus"></i> Create Free Account</a>
+            <a href="/find-parking.html" class="btn btn-secondary btn-lg"><i class="fas fa-search-location"></i> Find Parking</a>
+        </div>
+    </section>
+
+    <!-- ── FOOTER ─────────────────────────────────────── -->
+    <footer class="app-footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <a href="/index.html" class="brand-logo" style="margin-bottom:0.75rem">
+                    <i class="fas fa-square-parking"></i> SmartPark<span>AI</span>
+                </a>
+                <p>Cloud-native intelligent parking platform with AI recommendations, IoT sensors, dynamic pricing, and instant QR gate passes.</p>
+                <div class="footer-social">
+                    <a href="#" class="social-btn" title="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-btn" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-btn" title="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-btn" title="Email"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h5>Platform</h5>
+                <a href="/find-parking.html">Find Parking</a>
+                <a href="/slots.html">Live Slot Map</a>
+                <a href="/booking.html">Book a Slot</a>
+                <a href="/dashboard.html">My Dashboard</a>
+                <a href="/launch 3d demo.html">3D Simulation</a>
+            </div>
+            <div class="footer-col">
+                <h5>Management</h5>
+                <a href="/staff-scanner.html">Staff Gate Scanner</a>
+                <a href="/admin.html">Admin Analytics</a>
+                <a href="/api/health" target="_blank">System Health</a>
+            </div>
+            <div class="footer-col">
+                <h5>Technology</h5>
+                <a href="#" style="cursor:default">Node.js · Express</a>
+                <a href="#" style="cursor:default">SQLite · 17 Tables</a>
+                <a href="#" style="cursor:default">Python ML Pipeline</a>
+                <a href="#" style="cursor:default">Docker · AWS Ready</a>
+                <a href="#" style="cursor:default">GitHub Actions CI/CD</a>
+            </div>
+        </div>
+        <div class="footer-bottom" style="max-width:1320px;margin:0 auto;padding:1.25rem 1.5rem;">
             <span>© 2026 SmartPark AI Platform. All rights reserved.</span>
-            <span>Enterprise Cloud Architecture v2.0.0</span>
+            <span style="display:flex;align-items:center;gap:0.4rem">
+                <span class="live-dot" style="font-size:0.78rem">System Online</span>
+            </span>
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script src="/frontend/js/theme.js"></script>
     <script src="/frontend/js/api.js"></script>
     <script src="/frontend/js/auth.js"></script>
     <script>
-        async function loadLiveStats() {
-            try {
-                const res = await API.getAdminKPIs();
-                if (res && res.kpis) {
-                    document.getElementById('kpiTotalSlots').innerText = res.kpis.slots.total;
-                    document.getElementById('kpiAvailableSlots').innerText = res.kpis.slots.available;
-                    document.getElementById('kpiEvChargers').innerText = res.kpis.slots.evSlots;
-                }
-            } catch (e) {
-                // Fallback to static numbers if not logged in
+        // ── Scroll effect on header ────────────────────
+        window.addEventListener('scroll', () => {
+            document.getElementById('appHeader').classList.toggle('scrolled', window.scrollY > 20);
+        });
+
+        // ── Floating particles ─────────────────────────
+        (function spawnParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['rgba(37,99,235,0.6)', 'rgba(99,102,241,0.5)', 'rgba(6,182,212,0.5)'];
+            for (let i = 0; i < 18; i++) {
+                const p = document.createElement('div');
+                const size = Math.random() * 4 + 2;
+                p.className = 'particle';
+                Object.assign(p.style, {
+                    width: size + 'px',
+                    height: size + 'px',
+                    left: Math.random() * 100 + '%',
+                    top: (40 + Math.random() * 55) + '%',
+                    background: colors[Math.floor(Math.random() * colors.length)],
+                    animationDuration: (Math.random() * 8 + 6) + 's',
+                    animationDelay: (Math.random() * 6) + 's'
+                });
+                container.appendChild(p);
             }
+        })();
+
+        // ── Animated parking visualization ────────────
+        const vizSlots = [
+            { id: 'A1', status: 'available' }, { id: 'A2', status: 'occupied' },
+            { id: 'A3', status: 'available' }, { id: 'A4', status: 'reserved' },
+            { id: 'A5', status: 'ev' },
+            { id: 'B1', status: 'available' }, { id: 'B2', status: 'available' },
+            { id: 'B3', status: 'occupied' },  { id: 'B4', status: 'ev' },
+            { id: 'B5', status: 'available' },
+            { id: 'C1', status: 'occupied' },  { id: 'C2', status: 'available' },
+            { id: 'C3', status: 'available' }, { id: 'C4', status: 'available' },
+            { id: 'C5', status: 'occupied' },
+        ];
+
+        const statusIcons = { available: 'fas fa-car', occupied: 'fas fa-car', reserved: 'fas fa-clock', ev: 'fas fa-bolt', maintenance: 'fas fa-wrench' };
+
+        function renderVizGrid() {
+            const grid = document.getElementById('heroVizGrid');
+            grid.innerHTML = vizSlots.map(s => `
+                <div class="viz-slot ${s.status}" title="${s.id} — ${s.status}" onclick="window.location='/slots.html'">
+                    <i class="${statusIcons[s.status]}"></i>
+                    <span>${s.id}</span>
+                </div>
+            `).join('');
+            updateVizStats();
         }
 
+        function updateVizStats() {
+            const counts = vizSlots.reduce((acc, s) => { acc[s.status] = (acc[s.status] || 0) + 1; return acc; }, {});
+            document.getElementById('vizAvail').textContent = counts.available || 0;
+            document.getElementById('vizOcc').textContent   = counts.occupied  || 0;
+            document.getElementById('vizEv').textContent    = counts.ev        || 0;
+            document.getElementById('vizRes').textContent   = counts.reserved  || 0;
+        }
+
+        // Randomly animate a few slots every 3s to show "live" feel
+        function animateViz() {
+            const statuses = ['available', 'available', 'available', 'occupied', 'reserved', 'ev'];
+            const idx = Math.floor(Math.random() * vizSlots.length);
+            vizSlots[idx].status = statuses[Math.floor(Math.random() * statuses.length)];
+            renderVizGrid();
+        }
+
+        renderVizGrid();
+        setInterval(animateViz, 3000);
+
+        // ── Load live stats from API ───────────────────
+        async function loadLiveStats() {
+            try {
+                const r = await API.getLocations();
+                if (r && r.locations) {
+                    const total = r.locations.reduce((s, l) => s + l.total_slots, 0);
+                    const avail = r.locations.reduce((s, l) => s + l.available_slots, 0);
+                    document.getElementById('statSlots').textContent = total + '+';
+                    // update viz counts from real data
+                }
+            } catch (_) {}
+        }
+
+        // ── Hero search ───────────────────────────────
         function handleHeroSearch(e) {
             e.preventDefault();
-            const locId = document.getElementById('searchLocation').value;
-            const vType = document.getElementById('searchVehicleType').value;
-            const isEv = document.getElementById('searchEv').value;
-            window.location.href = `/find-parking.html?locationId=${locId}&vehicleType=${vType}&isEv=${isEv}`;
+            const loc  = document.getElementById('searchLocation').value;
+            const veh  = document.getElementById('searchVehicleType').value;
+            const ev   = document.getElementById('searchEv').value;
+            window.location.href = `/find-parking.html?locationId=${loc}&vehicleType=${veh}&isEv=${ev}`;
+        }
+
+        // ── Mobile menu ───────────────────────────────
+        function toggleMobileMenu() {
+            const nav = document.getElementById('dynamic-nav-links');
+            nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+            nav.style.flexDirection = 'column';
+            nav.style.position = 'absolute';
+            nav.style.top = 'var(--nav-height)';
+            nav.style.left = '0'; nav.style.right = '0';
+            nav.style.background = 'var(--bg-nav)';
+            nav.style.padding = '1rem';
+            nav.style.borderBottom = '1px solid var(--border-color)';
+            nav.style.boxShadow = 'var(--shadow-md)';
         }
 
         document.addEventListener('DOMContentLoaded', loadLiveStats);

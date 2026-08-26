@@ -6,13 +6,22 @@ on:
   pull_request:
     branches: [ main, master ]
 
+env:
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/smartpark-ai
+
 jobs:
+  # ─────────────────────────────────────────────────────────────
+  # JOB 1 — Build, test & validate
+  # ─────────────────────────────────────────────────────────────
   validate-and-test:
+    name: 🧪 Test & Validate
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Codebase
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # full history needed for SonarQube blame data
 
     - name: Set up Node.js Environment
       uses: actions/setup-node@v4
@@ -25,8 +34,19 @@ jobs:
       with:
         python-version: '3.13'
 
+    - name: Install Python ML Dependencies
+      run: pip install numpy pandas scikit-learn
+
     - name: Install Node Dependencies
       run: npm ci
+
+    - name: Create .env for CI
+      run: |
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+        echo "ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS || 'http://localhost:5000' }}" >> .env
+        echo "PORT=5000" >> .env
+        echo "NODE_ENV=test" >> .env
+        echo "DB_PATH=./database/smartpark.db" >> .env
 
     - name: Run ML Validation & Training Pipeline
       run: python ml/train_models.py
@@ -34,12 +54,222 @@ jobs:
     - name: Run Backend Integration & Automated Test Suite
       run: npm test
 
+  # ─────────────────────────────────────────────────────────────
+  # JOB 2 — SonarQube static analysis
+  # ─────────────────────────────────────────────────────────────
+  sonar-scan:
+    name: 🔍 SonarQube Analysis
+    runs-on: ubuntu-latest
+    needs: validate-and-test
+    if: github.event_name == 'push'
+
+    steps:
+    - name: Checkout Codebase
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Run SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  # ─────────────────────────────────────────────────────────────
+  # JOB 3 — Docker build, Trivy scan & push to Docker Hub
+  # ─────────────────────────────────────────────────────────────
+  docker-build-and-scan:
+    name: 🐳 Docker Build, Trivy Scan & Push
+    runs-on: ubuntu-latest
+    needs: validate-and-test
+    if: github.event_name == 'push'
+
+    steps:
+    - name: Checkout Codebase
+      uses: actions/checkout@v4
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build Production Docker Image
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build Docker Image (no push yet — scan first)
       uses: docker/build-push-action@v5
       with:
         context: .
         push: false
-        tags: smartpark-ai:latest
+        load: true
+        tags: |
+          ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          ${{ env.IMAGE_NAME }}:latest
+
+    - name: Run Trivy Vulnerability Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+        format: sarif
+        output: trivy-results.sarif
+        severity: CRITICAL,HIGH
+        exit-code: 1
+
+    - name: Upload Trivy Results to GitHub Security Tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()   # upload even if scan found issues
+      with:
+        sarif_file: trivy-results.sarif
+
+    - name: Push Verified Image to Docker Hub
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          ${{ env.IMAGE_NAME }}:latest
+
+  # ─────────────────────────────────────────────────────────────
+  # JOB 4 — Deploy to EC2 (with rollback on failure)
+  # ─────────────────────────────────────────────────────────────
+  deploy-ec2:
+    name: 🚀 Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: docker-build-and-scan
+    if: github.event_name == 'push'
+
+    steps:
+    - name: Deploy New Container & Tag Stable for Rollback
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          set -e
+
+          IMAGE="${{ env.IMAGE_NAME }}"
+          SHA_TAG="$IMAGE:${{ github.sha }}"
+          LATEST_TAG="$IMAGE:latest"
+          CONTAINER_NAME="smartpark-ai"
+          ENV_FILE="/etc/smartpark.env"
+
+          echo "🚀 Pulling new image: $SHA_TAG"
+          docker pull "$SHA_TAG"
+
+          # Tag current running image as :stable for rollback target
+          CURRENT_IMAGE=$(docker inspect --format='{{.Config.Image}}' "$CONTAINER_NAME" 2>/dev/null || echo "")
+          if [ -n "$CURRENT_IMAGE" ]; then
+            echo "📌 Tagging current image as stable: $IMAGE:stable"
+            docker tag "$CURRENT_IMAGE" "$IMAGE:stable"
+          fi
+
+          echo "🛑 Stopping old container (if running)..."
+          docker stop "$CONTAINER_NAME" 2>/dev/null || true
+          docker rm   "$CONTAINER_NAME" 2>/dev/null || true
+
+          echo "▶️  Starting new container..."
+          docker run -d \
+            --name "$CONTAINER_NAME" \
+            --restart unless-stopped \
+            -p 5000:5000 \
+            --env-file "$ENV_FILE" \
+            "$SHA_TAG"
+
+          echo "✅ Health check..."
+          sleep 5
+          curl -sf http://localhost:5000/api/health | grep '"status":"healthy"'
+          echo "🎉 Deployment successful!"
+
+    - name: Rollback on Deploy Failure
+      if: failure()
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          IMAGE="${{ env.IMAGE_NAME }}"
+          CONTAINER_NAME="smartpark-ai"
+          ENV_FILE="/etc/smartpark.env"
+
+          STABLE_EXISTS=$(docker images -q "$IMAGE:stable" 2>/dev/null)
+          if [ -z "$STABLE_EXISTS" ]; then
+            echo "⚠️  No :stable image found — cannot rollback."
+            exit 1
+          fi
+
+          echo "🔄 Rolling back to stable image..."
+          docker stop "$CONTAINER_NAME" 2>/dev/null || true
+          docker rm   "$CONTAINER_NAME" 2>/dev/null || true
+
+          docker run -d \
+            --name "$CONTAINER_NAME" \
+            --restart unless-stopped \
+            -p 5000:5000 \
+            --env-file "$ENV_FILE" \
+            "$IMAGE:stable"
+
+          echo "✅ Rollback complete — stable version is live."
+
+  # ─────────────────────────────────────────────────────────────
+  # JOB 5 — Slack Notification (always runs)
+  # ─────────────────────────────────────────────────────────────
+  notify:
+    name: 💬 Slack Notification
+    runs-on: ubuntu-latest
+    needs: [ validate-and-test, sonar-scan, docker-build-and-scan, deploy-ec2 ]
+    if: always() && github.event_name == 'push'
+
+    steps:
+    - name: Determine Pipeline Status
+      id: pipeline-status
+      run: |
+        if [[ "${{ needs.deploy-ec2.result }}" == "success" ]]; then
+          echo "status=✅ *DEPLOYED SUCCESSFULLY*" >> $GITHUB_OUTPUT
+          echo "color=#2eb886" >> $GITHUB_OUTPUT
+        elif [[ "${{ needs.validate-and-test.result }}" == "failure" ]]; then
+          echo "status=❌ *TESTS FAILED*" >> $GITHUB_OUTPUT
+          echo "color=#e01e5a" >> $GITHUB_OUTPUT
+        elif [[ "${{ needs.docker-build-and-scan.result }}" == "failure" ]]; then
+          echo "status=🚨 *TRIVY SCAN BLOCKED*" >> $GITHUB_OUTPUT
+          echo "color=#e01e5a" >> $GITHUB_OUTPUT
+        elif [[ "${{ needs.deploy-ec2.result }}" == "failure" ]]; then
+          echo "status=🔄 *DEPLOY FAILED — ROLLED BACK*" >> $GITHUB_OUTPUT
+          echo "color=#ecb22e" >> $GITHUB_OUTPUT
+        else
+          echo "status=⚠️  *PIPELINE INCOMPLETE*" >> $GITHUB_OUTPUT
+          echo "color=#ecb22e" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Post to Slack
+      uses: slackapi/slack-github-action@v1.24.0
+      with:
+        payload: |
+          {
+            "attachments": [{
+              "color": "${{ steps.pipeline-status.outputs.color }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*SmartPark AI CI/CD* — ${{ steps.pipeline-status.outputs.status }}\n*Branch:* `${{ github.ref_name }}`  |  *Commit:* `${{ github.sha }}` by *${{ github.actor }}*\n*Tests:* ${{ needs.validate-and-test.result }}  |  *SonarQube:* ${{ needs.sonar-scan.result }}  |  *Trivy:* ${{ needs.docker-build-and-scan.result }}  |  *Deploy:* ${{ needs.deploy-ec2.result }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [{
+                    "type": "button",
+                    "text": { "type": "plain_text", "text": "View Run" },
+                    "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }]
+                }
+              ]
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
