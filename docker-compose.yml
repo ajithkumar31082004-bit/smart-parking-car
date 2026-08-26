@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  smartpark-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartpark_ai_service
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - JWT_SECRET=smartpark_production_super_jwt_secret_2026
+      - DB_PATH=/app/database/smartpark.db
+    volumes:
+      - smartpark_data:/app/database
+
+volumes:
+  smartpark_data:
+    driver: local

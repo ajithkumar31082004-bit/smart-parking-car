@@ -3,292 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-IoT Smart Parking | Home</title>
+    <title>SmartPark AI — Intelligent Cloud-Based Smart Parking Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="/frontend/css/styles.css">
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --ev-green: #10b981;
-            --danger: #ef4444;
-            --dark: #1f2937;
-            --light: #f9fafb;
-            --gray: #6b7280;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        body {
-            background-color: #f3f4f6;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        .hero-section {
+            background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), 
+                        url('https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
+            padding: 5rem 5% 4rem;
             color: white;
-            padding: 1rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
         }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: 700;
+        .hero-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.25rem;
+            background: linear-gradient(135deg, #ffffff 40%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .logo i {
-            color: var(--ev-green);
-        }
-        nav {
-            display: flex;
-            gap: 1.5rem;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-        nav a:hover {
-            color: #93c5fd;
-        }
-        .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                        url('https://images.unsplash.com/photo-1600705725952-34d2693f36e8') no-repeat center center/cover;
-            height: 80vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            color: white;
-            padding: 0 1rem;
-        }
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            max-width: 800px;
-        }
-        .hero p {
-            font-size: 1.2rem;
-            max-width: 800px;
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #cbd5e1;
+            max-width: 650px;
             margin-bottom: 2rem;
         }
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--ev-green);
-            color: white;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .search-widget {
+            background: var(--bg-surface);
+            color: var(--text-main);
+            padding: 1.75rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            margin-top: 1.5rem;
+            border: 1px solid var(--border-color);
         }
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            background: #0d9488;
-        }
-        .features {
-            padding: 5rem 5%;
-            background: white;
-        }
-        .section-title {
-            text-align: center;
-            margin-bottom: 3rem;
-            font-size: 2rem;
-            color: var(--dark);
-        }
-        .features-grid {
+        .stats-strip {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3.5rem;
+        }
+        .stat-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
         }
         .feature-card {
-            background: var(--light);
-            border-radius: 10px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
             padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal);
             border-top: 4px solid var(--primary);
         }
         .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
         }
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+        .feature-icon-wrapper {
+            width: 54px;
+            height: 54px;
+            border-radius: var(--radius-md);
+            background: var(--primary-light);
             color: var(--primary);
-        }
-        .feature-card h3 {
-            margin-bottom: 1rem;
-            color: var(--primary-dark);
-        }
-        .demo-section {
-            padding: 5rem 5%;
-            background: #f3f4f6;
-            text-align: center;
-        }
-        .demo-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 2rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .demo-btn:hover {
-            background: var(--primary-dark);
-        }
-        footer {
-            background: var(--dark);
-            color: white;
-            text-align: center;
-            padding: 2rem;
-        }
-        .stats {
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 2rem;
-            margin: 3rem 0;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
         }
-        .stat-item {
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        .stat-label {
-            color: var(--gray);
-        }
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                padding: 1rem;
-            }
-            nav {
-                margin-top: 1rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .hero h1 {
-                font-size: 2rem;
-            }
-            .stats {
-                flex-direction: column;
-                gap: 1rem;
-            }
+        .feature-icon-wrapper.green {
+            background: var(--ev-green-light);
+            color: var(--ev-green-dark);
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <i class="fas fa-car"></i>
-            <span>SmartPark AI</span>
+    <!-- Navigation Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/index.html" class="brand-logo">
+                <i class="fas fa-car-side"></i>
+                <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
+            </a>
+            <nav class="nav-links" id="dynamic-nav-links">
+                <!-- Injected by auth.js -->
+            </nav>
+            <div class="nav-actions">
+                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme">
+                    <i class="fas fa-moon theme-icon"></i>
+                </button>
+                <div id="nav-auth-actions"></div>
+            </div>
         </div>
-        <nav>
-            <a href="index.html"><i class="fas fa-home"></i> Home</a>
-            <a href="slots.html"><i class="fas fa-map-marker-alt"></i> Parking Slots</a>
-            <a href="booking.html"><i class="fas fa-bookmark"></i> Book Now</a>
-            <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
-        </nav>
     </header>
 
-    <section class="hero">
-        <h1>AI-IoT Enabled Smart Parking with EV Charging</h1>
-        <p>Revolutionizing urban parking with real-time AI detection, EV charging stations, and secure digital gate access for seamless parking experience.</p>
-        <a href="slots.html" class="btn">View Available Slots <i class="fas fa-arrow-right"></i></a>
-    </section>
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <span class="badge badge-ai" style="margin-bottom: 1rem;"><i class="fas fa-sparkles"></i> AI-Powered Smart Parking Cloud</span>
+            <h1 class="hero-title">Find & Reserve Your Perfect Parking Spot in Real Time</h1>
+            <p class="hero-subtitle">Intelligent IoT slot tracking, predictive occupancy forecasting, fast EV charging reservations, and frictionless QR-pass check-ins.</p>
 
-    <div class="stats">
-        <div class="stat-item">
-            <div class="stat-number">500+</div>
-            <div class="stat-label">Parking Slots</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">120</div>
-            <div class="stat-label">EV Chargers</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">24/7</div>
-            <div class="stat-label">Availability</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">95%</div>
-            <div class="stat-label">Customer Satisfaction</div>
-        </div>
-    </div>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="/find-parking.html" class="btn btn-primary btn-lg"><i class="fas fa-search-location"></i> Find Parking Now</a>
+                <a href="/slots.html" class="btn btn-success btn-lg"><i class="fas fa-th"></i> View Live Slot Matrix</a>
+                <a href="/launch 3d demo.html" class="btn btn-secondary btn-lg"><i class="fas fa-cube"></i> Launch 3D Simulation</a>
+            </div>
 
-    <section class="features">
-        <h2 class="section-title">Smart Parking Features</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <h3>AI-Powered Detection</h3>
-                <p>Real-time parking slot detection using computer vision and IoT sensors to guide you to available spots.</p>
+            <!-- Instant Search Box -->
+            <div class="search-widget">
+                <form id="heroSearchForm" onsubmit="handleHeroSearch(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 140px; gap: 1rem; align-items: end;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> Destination</label>
+                        <select class="form-control" id="searchLocation">
+                            <option value="1">Downtown Metro Smart Deck</option>
+                            <option value="2">Silicon Tech Park Multi-Level Hub</option>
+                            <option value="3">Grand Central Mall Parking</option>
+                            <option value="4">Airport Terminal T3 Express Deck</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label"><i class="fas fa-car" style="color:var(--primary)"></i> Vehicle Type</label>
+                        <select class="form-control" id="searchVehicleType">
+                            <option value="car">Car / Sedan</option>
+                            <option value="suv">SUV</option>
+                            <option value="bike">Bike / Two-Wheeler</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label"><i class="fas fa-bolt" style="color:var(--ev-green)"></i> EV Charging</label>
+                        <select class="form-control" id="searchEv">
+                            <option value="true">Required (EV Fast Charger)</option>
+                            <option value="false">Not Required (Normal Slot)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="height: 44px;"><i class="fas fa-search"></i> Search</button>
+                </form>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <h3>EV Charging</h3>
-                <p>Dedicated parking slots with fast charging capabilities for electric vehicles with automated billing.</p>
+        </section>
+
+        <!-- Live Platform Stats (Fetched Dynamically) -->
+        <section class="stats-strip" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-number" id="kpiTotalSlots">120+</div>
+                <div class="stat-label">Total Parking Slots</div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-lock"></i>
-                </div>
-                <h3>Digital Gate Lock</h3>
-                <p>Secure access with unique digital codes or license plate recognition technology.</p>
+            <div class="stat-card">
+                <div class="stat-number" id="kpiAvailableSlots" style="color:var(--ev-green);">84</div>
+                <div class="stat-label">Live Available Spots</div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-line"></i>
+            <div class="stat-card">
+                <div class="stat-number" id="kpiEvChargers" style="color:var(--accent);">24+</div>
+                <div class="stat-label">EV Fast Chargers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="kpiOccupancy">99.8%</div>
+                <div class="stat-label">Availability Tracking</div>
+            </div>
+        </section>
+
+        <!-- Core Feature Pillars -->
+        <section style="margin-bottom: 4rem;">
+            <div style="text-align: center; margin-bottom: 2.5rem;">
+                <span class="badge badge-primary">Enterprise Capabilities</span>
+                <h2 style="font-size: 2.2rem; font-weight: 800; margin-top: 0.5rem;">Engineered for Seamless Mobility</h2>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 0.5rem auto 0;">Next-generation cloud infrastructure uniting IoT hardware, predictive AI models, and frictionless contactless payments.</p>
+            </div>
+
+            <div class="grid-3">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper"><i class="fas fa-satellite-dish"></i></div>
+                    <h3 style="margin-bottom: 0.5rem;">Real-Time IoT Availability</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">Sub-second slot state sync across ultrasonic and camera sensors prevents gate congestion and eliminates parking search time.</p>
                 </div>
-                <h3>Dynamic Pricing</h3>
-                <p>Smart algorithms adjust parking rates based on demand, time, and special events.</p>
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper green"><i class="fas fa-charging-station"></i></div>
+                    <h3 style="margin-bottom: 0.5rem;">EV Fast-Charging Hub</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">Reserve dedicated Level 2 and DC Fast Chargers (up to 60 kW) alongside your slot with real-time kWh and battery tracking.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper"><i class="fas fa-brain"></i></div>
+                    <h3 style="margin-bottom: 0.5rem;">AI Recommendation Engine</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">Multi-criteria weighted matching algorithms rank parking decks by distance, pricing, vehicle dimensions, and live capacity.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper"><i class="fas fa-qrcode"></i></div>
+                    <h3 style="margin-bottom: 0.5rem;">Instant QR Digital Pass</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">Automated tamper-proof QR code generation for 2-second touchless gate validation, check-in, and instant digital invoicing.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper"><i class="fas fa-chart-line"></i></div>
+                    <h3 style="margin-bottom: 0.5rem;">Dynamic Surge Pricing</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">Automated occupancy tier multipliers optimize municipal revenue during peak hours while offering budget off-peak rates.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper"><i class="fas fa-shield-alt"></i></div>
+                    <h3 style="margin-bottom: 0.5rem;">Anomaly & Fraud Protection</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">Multi-layer risk scoring detects rapid multi-booking spikes, bot hoarding, and payment inconsistencies in real-time.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div>
+                <a href="/index.html" class="brand-logo" style="margin-bottom: 0.75rem; display: inline-flex;">
+                    <i class="fas fa-car-side"></i>
+                    <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
+                </a>
+                <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 320px;">
+                    Cloud-native intelligent parking management platform built with AI recommendations, IoT sensor synchronization, and high-speed QR gate verification.
+                </p>
+            </div>
+            <div>
+                <h4 style="font-weight: 700; margin-bottom: 1rem;">Platform</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                    <a href="/find-parking.html">Find Parking</a>
+                    <a href="/slots.html">Live Slot Matrix</a>
+                    <a href="/launch 3d demo.html">3D Lot Simulation</a>
+                    <a href="/dashboard.html">Customer Portal</a>
+                </div>
+            </div>
+            <div>
+                <h4 style="font-weight: 700; margin-bottom: 1rem;">Staff & Admin</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                    <a href="/staff-scanner.html">Gate QR Scanner</a>
+                    <a href="/admin.html">Executive Analytics</a>
+                    <a href="/api/health" target="_blank">System Health</a>
+                </div>
+            </div>
+            <div>
+                <h4 style="font-weight: 700; margin-bottom: 1rem;">Technology</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                    <span>Node.js / Express REST</span>
+                    <span>SQLite Relational DB</span>
+                    <span>Python ML Forecasting</span>
+                    <span>Docker & AWS Ready</span>
+                </div>
             </div>
         </div>
-    </section>
-
-    <section class="demo-section">
-        <h2 class="section-title">Experience Our 3D Parking Demo</h2>
-        <p>Interact with our virtual parking lot to see how easy it is to find and book your perfect parking spot.</p>
-        <button class="demo-btn" onclick="window.location.href='booking_bill_3d.html'">
-            <a href="launch 3d demo.html" class="btn">Launch 3D Demo <i class="fas fa-external-link-alt"></i></a>
-        </button>
-    </section>
-
-    <footer>
-        <p>&copy; 2025 AI-IoT Smart Parking System. All rights reserved.</p>
-        <p>Designed for sustainable urban mobility solutions.</p>
+        <div class="footer-bottom">
+            <span>© 2026 SmartPark AI Platform. All rights reserved.</span>
+            <span>Enterprise Cloud Architecture v2.0.0</span>
+        </div>
     </footer>
+
+    <!-- Scripts -->
+    <script src="/frontend/js/theme.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
+    <script>
+        async function loadLiveStats() {
+            try {
+                const res = await API.getAdminKPIs();
+                if (res && res.kpis) {
+                    document.getElementById('kpiTotalSlots').innerText = res.kpis.slots.total;
+                    document.getElementById('kpiAvailableSlots').innerText = res.kpis.slots.available;
+                    document.getElementById('kpiEvChargers').innerText = res.kpis.slots.evSlots;
+                }
+            } catch (e) {
+                // Fallback to static numbers if not logged in
+            }
+        }
+
+        function handleHeroSearch(e) {
+            e.preventDefault();
+            const locId = document.getElementById('searchLocation').value;
+            const vType = document.getElementById('searchVehicleType').value;
+            const isEv = document.getElementById('searchEv').value;
+            window.location.href = `/find-parking.html?locationId=${locId}&vehicleType=${vType}&isEv=${isEv}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', loadLiveStats);
+    </script>
 </body>
 </html>

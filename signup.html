@@ -3,315 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up | SmartPark AI</title>
+    <title>Create Customer Account | SmartPark AI Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="/frontend/css/styles.css">
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --ev-green: #10b981;
-            --dark: #1f2937;
-            --light: #f9fafb;
-            --gray: #6b7280;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        body {
-            background-color: #f3f4f6;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .auth-container {
-            display: flex;
-            width: 900px;
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-        }
-        .auth-left {
-            flex: 1;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            padding: 3rem;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .auth-left::before {
-            content: "";
-            position: absolute;
-            top: -50px;
-            right: -50px;
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-        }
-        .auth-left::after {
-            content: "";
-            position: absolute;
-            bottom: -80px;
-            left: -80px;
-            width: 250px;
-            height: 250px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            z-index: 1;
-        }
-        .logo i {
-            color: var(--ev-green);
-        }
-        .auth-left h2 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-            z-index: 1;
-        }
-        .auth-left p {
-            opacity: 0.9;
-            margin-bottom: 2rem;
-            z-index: 1;
-        }
-        .auth-image {
-            width: 80%;
-            max-width: 300px;
-            z-index: 1;
-        }
-        .auth-right {
-            flex: 1;
-            padding: 3rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .auth-right h2 {
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
-        }
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--dark);
-        }
-        .input-field {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        .input-field:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        .password-field {
-            position: relative;
-        }
-        .password-toggle {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: var(--gray);
-        }
-        .btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .btn:hover {
-            background: var(--primary-dark);
-        }
-        .terms {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-        }
-        .terms input {
-            margin-right: 0.5rem;
-            margin-top: 0.2rem;
-        }
-        .terms label {
-            font-size: 0.9rem;
-            color: var(--gray);
-        }
-        .terms a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-        .terms a:hover {
-            text-decoration: underline;
-        }
-        .auth-footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: var(--gray);
-        }
-        .auth-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .auth-footer a:hover {
-            text-decoration: underline;
-        }
-        @media (max-width: 900px) {
-            .auth-container {
-                flex-direction: column;
-                width: 90%;
-                margin: 2rem auto;
-            }
-            .auth-left {
-                padding: 2rem;
-            }
-            .auth-image {
-                display: none;
-            }
-        }
-        @media (max-width: 480px) {
-            .auth-right {
-                padding: 2rem 1.5rem;
-            }
+        .auth-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            max-width: 520px;
+            margin: 2rem auto;
+            box-shadow: var(--shadow-lg);
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-left">
-            <div class="logo">
-                <i class="fas fa-car"></i>
-                <span>SmartPark AI</span>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/index.html" class="brand-logo">
+                <i class="fas fa-car-side"></i>
+                <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
+            </a>
+            <nav class="nav-links" id="dynamic-nav-links"></nav>
+            <div class="nav-actions">
+                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon theme-icon"></i></button>
             </div>
-            <h2>Create Your Account</h2>
-            <p>Join our smart parking community and enjoy seamless parking experiences</p>
-            <img src="https://cdn-icons-png.flaticon.com/512/3106/3106921.png" alt="Parking Illustration" class="auth-image">
         </div>
-        
-        <div class="auth-right">
-            <h2>Sign Up</h2>
-            
-            <form id="signupForm">
-                <div class="form-group">
-                    <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" class="input-field" placeholder="Enter your full name" required>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div class="auth-card">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="width: 50px; height: 50px; background: var(--ev-green-light); color: var(--ev-green-dark); border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 0.75rem;">
+                    <i class="fas fa-user-plus"></i>
                 </div>
-                
+                <h1 style="font-size: 1.8rem; font-weight: 800;">Create Account</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Join SmartPark AI for instant contactless parking & EV reservations.</p>
+            </div>
+
+            <form id="signupForm" onsubmit="handleSignup(event)">
                 <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" class="input-field" placeholder="Enter your email" required>
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="name" class="form-control" placeholder="e.g. Alex Johnson" required>
                 </div>
-                
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="password-field">
-                        <input type="password" id="password" class="input-field" placeholder="Create a password" required>
-                        <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" id="email" class="form-control" placeholder="name@domain.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" id="phone" class="form-control" placeholder="+91 98765 00000" required>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <div class="password-field">
-                        <input type="password" id="confirmPassword" class="input-field" placeholder="Confirm your password" required>
-                        <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
+                    <label class="form-label">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Minimum 8 characters" required minlength="6">
+                </div>
+
+                <!-- Initial Vehicle Registration -->
+                <div style="background:var(--bg-body); padding:1rem; border-radius:var(--radius-md); margin: 1.25rem 0;">
+                    <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Primary Vehicle (Optional)</span>
+                    <div class="grid-2" style="margin-top:0.5rem;">
+                        <input type="text" id="vehPlate" class="form-control" placeholder="License Plate (e.g. TN-01-AB-1234)" style="text-transform:uppercase;">
+                        <select id="vehType" class="form-control">
+                            <option value="car">Car / Sedan</option>
+                            <option value="suv">SUV</option>
+                            <option value="bike">Bike</option>
+                            <option value="ev">Electric Vehicle (EV)</option>
+                        </select>
                     </div>
                 </div>
-                
-                <div class="terms">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
-                </div>
-                
-                <button type="submit" class="btn">
-                    <i class="fas fa-user-plus"></i> Create Account
+
+                <button type="submit" id="signupBtn" class="btn btn-primary btn-lg" style="width: 100%;">
+                    <i class="fas fa-arrow-right"></i> Register & Continue
                 </button>
-                
-                <div class="auth-footer">
-                    Already have an account? <a href="login.html">Sign in</a>
-                </div>
             </form>
+
+            <div style="text-align: center; margin-top: 1.25rem; font-size: 0.9rem; color: var(--text-muted);">
+                Already have an account? <a href="/login.html" style="font-weight: 600;">Sign in</a>
+            </div>
         </div>
-    </div>
+    </main>
 
+    <!-- Scripts -->
+    <script src="/frontend/js/theme.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
     <script>
-        // Toggle password visibility
-        const togglePassword = document.getElementById('togglePassword');
-        const password = document.getElementById('password');
-        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-        const confirmPassword = document.getElementById('confirmPassword');
-        
-        togglePassword.addEventListener('click', function() {
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            this.classList.toggle('fa-eye-slash');
-        });
-        
-        toggleConfirmPassword.addEventListener('click', function() {
-            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-            confirmPassword.setAttribute('type', type);
-            this.classList.toggle('fa-eye-slash');
-        });
-
-        // Form submission
-        document.getElementById('signupForm').addEventListener('submit', function(e) {
+        async function handleSignup(e) {
             e.preventDefault();
-            
-            // Basic password match validation
-            if (password.value !== confirmPassword.value) {
-                alert('Passwords do not match!');
-                return;
-            }
-            
-            const formData = {
-                name: document.getElementById('fullName').value,
-                email: document.getElementById('email').value,
-                password: password.value
+            const btn = document.getElementById('signupBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+
+            const payload = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                password: document.getElementById('password').value,
+                vehicleNumber: document.getElementById('vehPlate').value.trim().toUpperCase(),
+                vehicleType: document.getElementById('vehType').value,
+                isEv: document.getElementById('vehType').value === 'ev'
             };
-            
-            // Here you would typically send this data to your server
-            console.log('Signup data:', formData);
-            
-            // For demo purposes, we'll store in localStorage and redirect
-            localStorage.setItem('user', JSON.stringify(formData));
-            window.location.href = 'index.html';
-        });
+
+            try {
+                const res = await API.register(payload);
+                if (res && res.token) {
+                    Auth.login(res.token, res.user);
+                    API.toast('Registration successful! Welcome to SmartPark AI.', 'success');
+                    setTimeout(() => window.location.href = '/dashboard.html', 800);
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-arrow-right"></i> Register & Continue';
+            }
+        }
     </script>
 </body>
 </html>

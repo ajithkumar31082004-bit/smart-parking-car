@@ -3,447 +3,401 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Parking | SmartPark AI</title>
+    <title>Smart Reservation & Checkout | SmartPark AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="/frontend/css/styles.css">
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --ev-green: #10b981;
-            --danger: #ef4444;
-            --dark: #1f2937;
-            --light: #f9fafb;
+        .booking-layout {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 2rem;
+            align-items: flex-start;
         }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+        .order-summary-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 90px;
         }
-        body {
-            background-color: #f3f4f6;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 1rem 5%;
+        .price-line {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            font-size: 0.95rem;
+            color: var(--text-muted);
         }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        .logo i {
-            color: var(--ev-green);
-        }
-        nav {
-            display: flex;
-            gap: 1.5rem;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        nav a:hover {
-            color: #93c5fd;
-        }
-        .container {
-            max-width: 600px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        h1 {
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .booking-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .slot-display {
-            background: var(--light);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 600;
-            color: var(--primary-dark);
-        }
-        .ev-tag {
-            background: var(--ev-green);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            margin-left: 0.5rem;
-        }
-        label {
-            display: block;
-            margin: 1rem 0 0.5rem;
-            font-weight: 500;
-            color: var(--dark);
-        }
-        input, select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        .form-section {
-            display: none;
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            background: var(--light);
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-        }
-        .active-section {
-            display: block;
-        }
-        button {
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            margin-top: 2rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        button:hover {
-            background: var(--primary-dark);
-        }
-        .price-display {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background: var(--light);
-            border-radius: 8px;
-        }
-        .price-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 0.5rem 0;
-        }
-        .total-row {
-            font-weight: 700;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        .price {
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-        .ev-notice {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(16, 185, 129, 0.1);
-            padding: 0.75rem;
-            border-radius: 8px;
+        .price-line.total {
+            border-top: 2px dashed var(--border-color);
             margin-top: 1rem;
-            color: var(--ev-green);
-            font-size: 0.9rem;
+            padding-top: 1rem;
+            font-weight: 800;
+            font-size: 1.35rem;
+            color: var(--primary);
         }
-        .ev-charge-details {
-            background: rgba(16, 185, 129, 0.05);
-            border-left: 3px solid var(--ev-green);
-            padding: 0.8rem;
-            margin-top: 0.5rem;
-            border-radius: 0 8px 8px 0;
+        .ev-addon-box {
+            background: rgba(16, 185, 129, 0.06);
+            border: 1px solid var(--ev-green);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-top: 1.25rem;
         }
-        .ev-charge-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 0.3rem 0;
-            font-size: 0.9rem;
-        }
-        @media (max-width: 640px) {
-            .container {
-                margin: 1rem;
-                padding: 1.5rem;
-            }
-            header {
-                flex-direction: column;
-                padding: 1rem;
-            }
-            nav {
-                margin-top: 1rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
+        @media (max-width: 900px) {
+            .booking-layout { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <i class="fas fa-car"></i>
-            <span>SmartPark AI</span>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/index.html" class="brand-logo">
+                <i class="fas fa-car-side"></i>
+                <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
+            </a>
+            <nav class="nav-links" id="dynamic-nav-links"></nav>
+            <div class="nav-actions">
+                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon theme-icon"></i></button>
+                <div id="nav-auth-actions"></div>
+            </div>
         </div>
-        <nav>
-            <a href="index.html"><i class="fas fa-home"></i> Home</a>
-            <a href="slots.html"><i class="fas fa-map-marker-alt"></i> Parking Slots</a>
-            <a href="booking.html"><i class="fas fa-bookmark"></i> Book Now</a>
-            <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
-        </nav>
     </header>
 
-    <div class="container">
-        <h1><i class="fas fa-parking"></i> Book Your Parking</h1>
-        
-        <div class="booking-header">
-            <div>
-                <h3>Selected Slot</h3>
-                <div class="slot-display" id="selectedSlotDisplay">
-                    Not selected
-                </div>
-            </div>
-            <div id="slotTypeDisplay"></div>
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div style="margin-bottom: 2rem;">
+            <a href="/slots.html" style="font-size:0.9rem; color:var(--text-muted); display:inline-flex; align-items:center; gap:0.35rem; margin-bottom:0.5rem;">
+                <i class="fas fa-arrow-left"></i> Change Slot
+            </a>
+            <h1 style="font-size: 2.2rem; font-weight: 800;">Complete Your Smart Reservation</h1>
+            <p style="color: var(--text-muted);">Review spot configurations, select optional EV fast-charging, and apply dynamic promo discounts.</p>
         </div>
 
-        <form id="bookingForm">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+        <div class="booking-layout">
+            <!-- Left Form Area -->
+            <div class="card">
+                <form id="bookingForm" onsubmit="handleBookingSubmit(event)">
+                    <!-- Selected Spot Banner -->
+                    <div style="background:var(--primary-light); padding:1rem; border-radius:var(--radius-md); margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span style="font-size:0.75rem; font-weight:700; color:var(--primary-dark); text-transform:uppercase;">Selected Space</span>
+                            <h3 style="font-weight:800; color:var(--primary-dark);" id="displaySlotNum">Slot A01</h3>
+                            <div style="font-size:0.85rem; color:var(--primary-dark);" id="displayLocName">Downtown Metro Smart Deck</div>
+                        </div>
+                        <span class="badge badge-ai" id="displaySlotType">Standard Car</span>
+                    </div>
 
-            <label for="vehicle">Vehicle Number</label>
-            <input type="text" id="vehicle" name="vehicle" placeholder="e.g., TN-01-AB-1234" required>
+                    <!-- Customer Info -->
+                    <h3 style="font-weight:700; margin-bottom:1rem; font-size:1.1rem;"><i class="fas fa-user-circle" style="color:var(--primary)"></i> Driver Information</h3>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" id="custName" class="form-control" placeholder="Enter full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" id="custPhone" class="form-control" placeholder="+91 98765 43210" required>
+                        </div>
+                    </div>
 
-            <label for="bookingType">Booking Type</label>
-            <select id="bookingType" name="bookingType" required>
-                <option value="">-- Select Booking Type --</option>
-                <option value="hour">Hourly Parking</option>
-                <option value="day">Daily Parking</option>
-            </select>
+                    <!-- Vehicle Selection -->
+                    <h3 style="font-weight:700; margin:1.5rem 0 1rem; font-size:1.1rem;"><i class="fas fa-car" style="color:var(--primary)"></i> Vehicle Details</h3>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Vehicle License Plate</label>
+                            <input type="text" id="vehicleNumber" class="form-control" placeholder="e.g. TN-01-AB-1234" style="text-transform:uppercase;" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Vehicle Type</label>
+                            <select id="vehicleType" class="form-control" onchange="recalculatePrice()">
+                                <option value="car">Car / Sedan</option>
+                                <option value="suv">SUV</option>
+                                <option value="bike">Bike</option>
+                                <option value="ev">Electric Vehicle (EV)</option>
+                            </select>
+                        </div>
+                    </div>
 
-            <div id="hourSection" class="form-section">
-                <label for="startTime">Start Time</label>
-                <input type="time" id="startTime" name="startTime" required>
+                    <!-- Duration & Schedule -->
+                    <h3 style="font-weight:700; margin:1.5rem 0 1rem; font-size:1.1rem;"><i class="fas fa-clock" style="color:var(--primary)"></i> Duration & Start Time</h3>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Arrival Date & Time</label>
+                            <input type="datetime-local" id="startTime" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Parking Duration (Hours)</label>
+                            <select id="durationHours" class="form-control" onchange="recalculatePrice()">
+                                <option value="1">1 Hour</option>
+                                <option value="2" selected>2 Hours</option>
+                                <option value="3">3 Hours</option>
+                                <option value="4">4 Hours</option>
+                                <option value="6">6 Hours</option>
+                                <option value="8">8 Hours (Full Day)</option>
+                                <option value="12">12 Hours</option>
+                            </select>
+                        </div>
+                    </div>
 
-                <label for="endTime">End Time</label>
-                <input type="time" id="endTime" name="endTime" required>
+                    <!-- EV Charging Addon (Auto enabled if EV slot selected) -->
+                    <div class="ev-addon-box" id="evAddonBox">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label style="font-weight:700; display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                                <input type="checkbox" id="requireEvCharging" style="width:18px; height:18px;" onchange="recalculatePrice()">
+                                <span><i class="fas fa-bolt" style="color:var(--ev-green)"></i> Include EV Fast Charging Station</span>
+                            </label>
+                            <span class="badge badge-success">50 kW DC Fast</span>
+                        </div>
+                        <div id="evChargingSubfields" style="margin-top:1rem; display:none;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label" style="font-size:0.85rem;">Charging Duration (Hours)</label>
+                                <select id="evDurationHours" class="form-control" onchange="recalculatePrice()">
+                                    <option value="1" selected>1 Hour (~20 kWh battery boost)</option>
+                                    <option value="2">2 Hours (~40 kWh full top-up)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Promo Code -->
+                    <div style="margin-top:1.5rem;">
+                        <label class="form-label"><i class="fas fa-ticket-alt" style="color:var(--accent)"></i> Promo Code (Optional)</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="text" id="promoCode" class="form-control" placeholder="Try 'SMART20' or 'FIRSTPARK'" style="text-transform:uppercase;">
+                            <button type="button" onclick="applyPromo()" class="btn btn-secondary">Apply</button>
+                        </div>
+                        <span id="promoFeedback" style="font-size:0.85rem; margin-top:0.35rem; display:block;"></span>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn btn-primary btn-lg" style="width:100%; margin-top:2rem;">
+                        <i class="fas fa-lock"></i> Proceed to Secure Payment
+                    </button>
+                </form>
             </div>
 
-            <div id="daySection" class="form-section">
-                <label for="startDate">Start Date</label>
-                <input type="date" id="startDate" name="startDate" required>
+            <!-- Right Summary Card -->
+            <div class="order-summary-card">
+                <h3 style="font-weight: 700; margin-bottom: 1.25rem;">Price Breakdown</h3>
 
-                <label for="endDate">End Date</label>
-                <input type="date" id="endDate" name="endDate" required>
-            </div>
-
-            <div class="price-display">
-                <div class="price-row">
-                    <span>Base Parking:</span>
-                    <span id="basePrice">₹0</span>
+                <div class="price-line">
+                    <span>Base Parking Rate</span>
+                    <span id="summaryBaseRate">₹50 / hr</span>
                 </div>
-                <div id="evChargeRow" class="price-row" style="display:none;">
-                    <span>EV Charging:</span>
-                    <span id="evCharge">₹0</span>
+                <div class="price-line">
+                    <span>Duration</span>
+                    <span id="summaryDuration">2 Hours</span>
                 </div>
-                <div class="price-row total-row">
-                    <span>Total Amount:</span>
-                    <span class="price" id="totalPrice">₹0</span>
+                <div class="price-line">
+                    <span>Dynamic Surge Multiplier</span>
+                    <span id="summaryMultiplier" class="badge badge-primary">1.00x (Standard)</span>
+                </div>
+                <div class="price-line">
+                    <span>Base Parking Subtotal</span>
+                    <span id="summaryParkingSubtotal" style="font-weight:600;">₹100.00</span>
+                </div>
+                <div class="price-line" id="evSummaryLine" style="display:none;">
+                    <span>EV Fast Charging</span>
+                    <span id="summaryEvCharge" style="color:var(--ev-green-dark); font-weight:600;">+₹75.00</span>
+                </div>
+                <div class="price-line" id="discountSummaryLine" style="display:none; color:var(--ev-green-dark);">
+                    <span>Promo Discount</span>
+                    <span id="summaryDiscount">-₹20.00</span>
+                </div>
+                <div class="price-line">
+                    <span>GST (18%)</span>
+                    <span id="summaryTax">₹18.00</span>
+                </div>
+
+                <div class="price-line total">
+                    <span>Total Amount</span>
+                    <span id="summaryGrandTotal">₹118.00</span>
+                </div>
+
+                <div style="margin-top:1.5rem; padding:1rem; border-radius:var(--radius-md); background:var(--bg-body); font-size:0.8rem; color:var(--text-muted);">
+                    <i class="fas fa-shield-alt" style="color:var(--ev-green)"></i> Free cancellation up to 2 hours prior to scheduled arrival time with 100% refund.
                 </div>
             </div>
+        </div>
+    </main>
 
-            <div id="evNotice" class="ev-notice" style="display: none;">
-                <i class="fas fa-bolt"></i>
-                <span>This is an EV charging slot. Additional charging fees apply.</span>
-            </div>
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-bottom" style="margin-top:0; border:none;">
+            <span>© 2026 SmartPark AI Platform. All rights reserved.</span>
+            <span>256-Bit SSL Encrypted Booking Gateway</span>
+        </div>
+    </footer>
 
-            <button type="submit">
-                <i class="fas fa-lock"></i> Confirm Booking & Get Gate Code
-            </button>
-        </form>
-    </div>
-
+    <!-- Scripts -->
+    <script src="/frontend/js/theme.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
     <script>
-        // Get URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const slotParam = urlParams.get('slot');
-        const typeParam = urlParams.get('type');
+        let currentSlotId = 1;
+        let baseHourlyRate = 50;
+        let dynamicMultiplier = 1.0;
+        let appliedDiscount = 0;
 
-        // Update slot display
-        if (slotParam) {
-            document.getElementById('selectedSlotDisplay').textContent = `Slot ${slotParam}`;
-            
-            if (typeParam === 'ev') {
-                document.getElementById('selectedSlotDisplay').innerHTML += 
-                    `<span class="ev-tag"><i class="fas fa-bolt"></i> EV Charging</span>`;
-                document.getElementById('evNotice').style.display = 'flex';
+        function initializeDefaults() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentSlotId = urlParams.get('slotId') || 1;
+            const slotNum = urlParams.get('slotNumber') || 'A01';
+            const isEv = urlParams.get('isEv') === 'true';
+
+            document.getElementById('displaySlotNum').innerText = `Slot ${slotNum}`;
+            if (isEv) {
+                document.getElementById('requireEvCharging').checked = true;
+                document.getElementById('evChargingSubfields').style.display = 'block';
+                document.getElementById('displaySlotType').innerText = 'EV Fast Charger';
+                document.getElementById('vehicleType').value = 'ev';
             }
+
+            // Set current time into arrival input
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('startTime').value = now.toISOString().slice(0, 16);
+
+            // Populate user if logged in
+            const user = Auth.getUser();
+            if (user) {
+                document.getElementById('custName').value = user.name || '';
+                document.getElementById('custPhone').value = user.phone || '';
+            }
+
+            fetchDynamicQuote();
         }
 
-        // Show/hide booking sections
-        document.getElementById('bookingType').addEventListener('change', function() {
-            document.getElementById('hourSection').classList.remove('active-section');
-            document.getElementById('daySection').classList.remove('active-section');
-            
-            if (this.value === 'hour') {
-                document.getElementById('hourSection').classList.add('active-section');
-            } else if (this.value === 'day') {
-                document.getElementById('daySection').classList.add('active-section');
-            }
-            calculatePrice();
-        });
+        async function fetchDynamicQuote() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const locId = urlParams.get('locationId') || 1;
+                const hours = document.getElementById('durationHours').value;
 
-        // Update price when inputs change
-        document.querySelectorAll('#startTime, #endTime, #startDate, #endDate').forEach(
-            element => element.addEventListener('change', calculatePrice)
-        );
-
-        // Calculate price function
-        function calculatePrice() {
-            const isEV = typeParam === 'ev';
-            const bookingType = document.getElementById('bookingType').value;
-            let basePrice = 0, evCharge = 0;
-
-            if (bookingType === 'hour') {
-                const startTime = document.getElementById('startTime').value;
-                const endTime = document.getElementById('endTime').value;
-                
-                if (startTime && endTime) {
-                    const start = new Date(`2000-01-01T${startTime}`);
-                    const end = new Date(`2000-01-01T${endTime}`);
-                    const hours = (end - start) / (1000 * 60 * 60);
-                    
-                    if (hours > 0) {
-                        basePrice = Math.round(hours * 50);
-                        if (isEV) {
-                            evCharge = Math.round(hours * 20);
-                            document.getElementById('evChargeRow').style.display = 'flex';
-                        } else {
-                            document.getElementById('evChargeRow').style.display = 'none';
-                        }
-                    }
+                const res = await API.getDynamicPriceQuote(locId, hours);
+                if (res && res.success) {
+                    baseHourlyRate = res.baseHourlyRate;
+                    dynamicMultiplier = res.dynamicMultiplier;
+                    document.getElementById('displayLocName').innerText = res.locationName;
+                    document.getElementById('summaryBaseRate').innerText = `₹${baseHourlyRate} / hr`;
+                    document.getElementById('summaryMultiplier').innerText = `${dynamicMultiplier}x (${res.tierLabel.split(' ')[0]})`;
                 }
-            } 
-            else if (bookingType === 'day') {
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
-                
-                if (startDate && endDate) {
-                    const start = new Date(startDate);
-                    const end = new Date(endDate);
-                    const days = ((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                    
-                    if (days > 0) {
-                        basePrice = days * 300;
-                        if (isEV) {
-                            evCharge = days * 100;
-                            document.getElementById('evChargeRow').style.display = 'flex';
-                        } else {
-                            document.getElementById('evChargeRow').style.display = 'none';
-                        }
-                    }
-                }
+            } catch (e) {
+                // Fallback
             }
-
-            document.getElementById('basePrice').textContent = `₹${basePrice}`;
-            document.getElementById('evCharge').textContent = `₹${evCharge}`;
-            document.getElementById('totalPrice').textContent = `₹${basePrice + evCharge}`;
+            recalculatePrice();
         }
 
-        // Handle form submission
-        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        function recalculatePrice() {
+            const hours = Number(document.getElementById('durationHours').value);
+            const isEvChecked = document.getElementById('requireEvCharging').checked;
+            document.getElementById('evChargingSubfields').style.display = isEvChecked ? 'block' : 'none';
+
+            const effectiveRate = Math.round(baseHourlyRate * dynamicMultiplier);
+            const parkingSubtotal = effectiveRate * hours;
+
+            let evCharge = 0;
+            if (isEvChecked) {
+                const evHours = Number(document.getElementById('evDurationHours').value);
+                const kwhEst = 50 * 0.4 * evHours; // ~20 kWh
+                evCharge = Math.round(kwhEst * 15); // ₹15/kWh
+                document.getElementById('evSummaryLine').style.display = 'flex';
+                document.getElementById('summaryEvCharge').innerText = `+₹${evCharge}.00`;
+            } else {
+                document.getElementById('evSummaryLine').style.display = 'none';
+            }
+
+            const subtotal = parkingSubtotal + evCharge;
+            let discountAmount = 0;
+            if (appliedDiscount > 0) {
+                discountAmount = Math.min(subtotal, appliedDiscount);
+                document.getElementById('discountSummaryLine').style.display = 'flex';
+                document.getElementById('summaryDiscount').innerText = `-₹${discountAmount.toFixed(2)}`;
+            } else {
+                document.getElementById('discountSummaryLine').style.display = 'none';
+            }
+
+            const taxable = Math.max(0, subtotal - discountAmount);
+            const tax = parseFloat((taxable * 0.18).toFixed(2));
+            const grandTotal = parseFloat((taxable + tax).toFixed(2));
+
+            document.getElementById('summaryDuration').innerText = `${hours} Hours`;
+            document.getElementById('summaryParkingSubtotal').innerText = `₹${parkingSubtotal.toFixed(2)}`;
+            document.getElementById('summaryTax').innerText = `₹${tax.toFixed(2)}`;
+            document.getElementById('summaryGrandTotal').innerText = `₹${grandTotal.toFixed(2)}`;
+
+            return {
+                hours,
+                parkingSubtotal,
+                evCharge,
+                discountAmount,
+                tax,
+                grandTotal
+            };
+        }
+
+        function applyPromo() {
+            const code = document.getElementById('promoCode').value.trim().toUpperCase();
+            const feedback = document.getElementById('promoFeedback');
+
+            if (code === 'SMART20') {
+                appliedDiscount = 35.0; // Dynamic 20%
+                feedback.innerHTML = '<span style="color:var(--ev-green);"><i class="fas fa-check"></i> Coupon SMART20 applied! 20% discount activated.</span>';
+            } else if (code === 'FIRSTPARK') {
+                appliedDiscount = 50.0;
+                feedback.innerHTML = '<span style="color:var(--ev-green);"><i class="fas fa-check"></i> Coupon FIRSTPARK applied! ₹50.00 saved.</span>';
+            } else {
+                appliedDiscount = 0;
+                feedback.innerHTML = '<span style="color:var(--danger);"><i class="fas fa-times"></i> Invalid coupon code.</span>';
+            }
+            recalculatePrice();
+        }
+
+        async function handleBookingSubmit(e) {
             e.preventDefault();
-            
-            // Calculate final price
-            let price = 0;
-            let durationText = '';
-            const bookingType = document.getElementById('bookingType').value;
-            const isEV = typeParam === 'ev';
-            
-            if (bookingType === 'hour') {
-                const startTime = document.getElementById('startTime').value;
-                const endTime = document.getElementById('endTime').value;
-                const start = new Date(`2000-01-01T${startTime}`);
-                const end = new Date(`2000-01-01T${endTime}`);
-                const diffHours = (end - start) / (1000 * 60 * 60);
-                price = Math.round(diffHours * 50);
-                durationText = `${startTime} to ${endTime}`;
-                
-                if (isEV) {
-                    price += Math.round(diffHours * 20);
-                }
-            } else if (bookingType === 'day') {
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                const diffDays = (end - start) / (1000 * 60 * 60 * 24) + 1;
-                price = diffDays * 300;
-                durationText = `${startDate} to ${endDate}`;
-                
-                if (isEV) {
-                    price += diffDays * 100;
-                }
+
+            if (!Auth.isLoggedIn()) {
+                API.toast('Please log in to finalize your reservation.', 'warning');
+                setTimeout(() => window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.href)}`, 800);
+                return;
             }
 
-            const gateCode = Math.floor(100000 + Math.random() * 900000);
-            const bookingData = {
-                slot: slotParam || "Not specified",
-                name: document.getElementById('name').value,
-                vehicle: document.getElementById('vehicle').value,
-                bookingType: bookingType,
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reserving Slot & Generating QR Pass...';
+
+            const pricing = recalculatePrice();
+            const bookingPayload = {
+                slotId: Number(currentSlotId),
+                vehicleNumber: document.getElementById('vehicleNumber').value.trim().toUpperCase(),
+                vehicleType: document.getElementById('vehicleType').value,
                 startTime: document.getElementById('startTime').value,
-                endTime: document.getElementById('endTime').value,
-                startDate: document.getElementById('startDate').value,
-                endDate: document.getElementById('endDate').value,
-                durationText: durationText,
-                price: price,
-                evCharge: isEV,
-                gateCode: gateCode,
-                type: typeParam || "normal"
+                durationHours: pricing.hours,
+                requiresEvCharging: document.getElementById('requireEvCharging').checked,
+                evChargeDurationHours: Number(document.getElementById('evDurationHours').value),
+                discountCode: document.getElementById('promoCode').value.trim()
             };
 
-            // Store booking data in localStorage
-            localStorage.setItem('bookingData', JSON.stringify(bookingData));
-            window.location.href = 'bill.html';
-        });
+            try {
+                const res = await API.createBooking(bookingPayload);
+                if (res && res.success) {
+                    API.toast('Reservation confirmed! Redirecting to payment...', 'success');
+                    // Store for payment page
+                    localStorage.setItem('active_checkout_booking', JSON.stringify(res.booking));
+                    setTimeout(() => {
+                        window.location.href = `/payment.html?bookingId=${res.booking.id}&code=${res.booking.bookingCode}&amount=${res.booking.totalAmount}`;
+                    }, 800);
+                }
+            } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-lock"></i> Proceed to Secure Payment';
+            }
+        }
 
-        // Initialize date fields with today's date
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('startDate').value = today;
-        document.getElementById('endDate').value = today;
+        document.addEventListener('DOMContentLoaded', initializeDefaults);
     </script>
 </body>
 </html>

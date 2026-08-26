@@ -3,349 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parking Slots | SmartPark AI</title>
+    <title>Live Parking Slots Matrix | SmartPark AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="/frontend/css/styles.css">
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --ev-green: #10b981;
-            --danger: #ef4444;
-            --dark: #1f2937;
-            --light: #f9fafb;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        body {
-            background-color: #f3f4f6;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 1rem 5%;
+        .location-select-bar {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        .logo i {
-            color: var(--ev-green);
-        }
-        nav {
-            display: flex;
-            gap: 1.5rem;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        nav a:hover {
-            color: #93c5fd;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .parking-lot {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        .floor {
-            margin-bottom: 3rem;
-        }
-        .floor-title {
-            background: var(--primary);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .slots-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            flex-wrap: wrap;
             gap: 1rem;
         }
-        .slot {
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        .slot:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-        .slot.ev {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
-            border: 2px solid var(--ev-green);
-        }
-        .slot.normal {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(37, 99, 235, 0.2));
-            border: 2px solid var(--primary);
-        }
-        .slot.booked {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.2));
-            border: 2px solid var(--danger);
-            cursor: not-allowed;
-        }
-        .slot-id {
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-        .slot-type {
-            font-size: 0.8rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 20px;
-            display: inline-block;
-        }
-        .ev-type {
-            background: var(--ev-green);
-            color: white;
-        }
-        .normal-type {
-            background: var(--primary);
-            color: white;
-        }
-        .booked-type {
-            background: var(--danger);
-            color: white;
-        }
-        .road {
-            height: 40px;
-            background: #9e9e9e;
-            margin: 1rem 0;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-        }
-        .legend {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
+        .floor-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
             margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .floor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .zone-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 1rem 0 0.5rem;
+        }
+        .legend-strip {
+            display: flex;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
         }
         .legend-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
         .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
         }
-        .legend-color.ev {
-            background: var(--ev-green);
+        /* Sticky Selected Drawer */
+        .selected-drawer {
+            position: sticky;
+            bottom: 20px;
+            background: var(--bg-surface);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 900;
+            backdrop-filter: blur(12px);
+            animation: slideUp 0.3s ease;
         }
-        .legend-color.normal {
-            background: var(--primary);
-        }
-        .legend-color.booked {
-            background: var(--danger);
-        }
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                padding: 1rem;
-            }
-            nav {
-                margin-top: 1rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .slots-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <i class="fas fa-car"></i>
-            <span>SmartPark AI</span>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/index.html" class="brand-logo">
+                <i class="fas fa-car-side"></i>
+                <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
+            </a>
+            <nav class="nav-links" id="dynamic-nav-links"></nav>
+            <div class="nav-actions">
+                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon theme-icon"></i></button>
+                <div id="nav-auth-actions"></div>
+            </div>
         </div>
-        <nav>
-            <a href="index.html"><i class="fas fa-home"></i> Home</a>
-            <a href="slots.html"><i class="fas fa-map-marker-alt"></i> Parking Slots</a>
-            <a href="booking.html"><i class="fas fa-bookmark"></i> Book Now</a>
-            <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
-        </nav>
     </header>
 
-    <div class="container">
-        <h1><i class="fas fa-parking"></i> Available Parking Slots</h1>
-        
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color ev"></div>
-                <span>EV Charging</span>
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 1.5rem; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <span class="badge badge-primary"><i class="fas fa-satellite-dish"></i> Live IoT Matrix</span>
+                <h1 style="font-size: 2.2rem; font-weight: 800; margin-top: 0.5rem;">Interactive Parking Slots</h1>
+                <p style="color: var(--text-muted);">Real-time floor occupancy, EV fast charger statuses, and instant reservation locking.</p>
             </div>
-            <div class="legend-item">
-                <div class="legend-color normal"></div>
-                <span>Regular Parking</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color booked"></div>
-                <span>Booked</span>
+            <div style="display:flex; gap:0.75rem;">
+                <button onclick="loadSlots()" class="btn btn-secondary btn-sm"><i class="fas fa-sync-alt"></i> Refresh Matrix</button>
+                <a href="/launch 3d demo.html" class="btn btn-primary btn-sm"><i class="fas fa-cube"></i> Open 3D View</a>
             </div>
         </div>
 
-        <div class="parking-lot">
-            <div class="floor">
-                <div class="floor-title">
-                    <i class="fas fa-layer-group"></i> Ground Floor
-                </div>
-                <div class="slots-grid">
-                    <!-- EV Slots 1-5 -->
-                    <div class="slot ev" onclick="bookSlot(1, 'ev')">
-                        <div class="slot-id">EV 1 ⚡</div>
-                        <div class="slot-type ev-type">Available</div>
-                    </div>
-                    <div class="slot ev" onclick="bookSlot(2, 'ev')">
-                        <div class="slot-id">EV 2 ⚡</div>
-                        <div class="slot-type ev-type">Available</div>
-                    </div>
-                    <div class="slot ev" onclick="bookSlot(3, 'ev')">
-                        <div class="slot-id">EV 3 ⚡</div>
-                        <div class="slot-type ev-type">Available</div>
-                    </div>
-                    <div class="slot ev" onclick="bookSlot(4, 'ev')">
-                        <div class="slot-id">EV 4 ⚡</div>
-                        <div class="slot-type ev-type">Available</div>
-                    </div>
-                    <div class="slot ev" onclick="bookSlot(5, 'ev')">
-                        <div class="slot-id">EV 5 ⚡</div>
-                        <div class="slot-type ev-type">Available</div>
-                    </div>
-                </div>
-                
-                <div class="road">Main Road</div>
-                
-                <div class="slots-grid">
-                    <!-- Normal Slots 6-10 -->
-                    <div class="slot normal" onclick="bookSlot(6, 'normal')">
-                        <div class="slot-id">Slot 6</div>
-                        <div class="slot-type normal-type">Available</div>
-                    </div>
-                    <div class="slot normal" onclick="bookSlot(7, 'normal')">
-                        <div class="slot-id">Slot 7</div>
-                        <div class="slot-type normal-type">Available</div>
-                    </div>
-                    <div class="slot normal" onclick="bookSlot(8, 'normal')">
-                        <div class="slot-id">Slot 8</div>
-                        <div class="slot-type normal-type">Available</div>
-                    </div>
-                    <div class="slot booked">
-                        <div class="slot-id">Slot 9</div>
-                        <div class="slot-type booked-type">Booked</div>
-                    </div>
-                    <div class="slot normal" onclick="bookSlot(10, 'normal')">
-                        <div class="slot-id">Slot 10</div>
-                        <div class="slot-type normal-type">Available</div>
-                    </div>
-                </div>
+        <!-- Location Selector & Dynamic Pricing Alert -->
+        <div class="location-select-bar">
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <label style="font-weight: 700; font-size: 0.95rem;"><i class="fas fa-building" style="color:var(--primary)"></i> Select Location:</label>
+                <select id="locationSelect" class="form-control" style="width: auto; min-width: 260px;" onchange="loadSlots()">
+                    <option value="1">Downtown Metro Smart Deck</option>
+                    <option value="2">Silicon Tech Park Hub</option>
+                    <option value="3">Grand Central Mall Parking</option>
+                    <option value="4">Airport Terminal T3 Express Deck</option>
+                </select>
             </div>
-            
-            <div class="floor">
-                <div class="floor-title">
-                    <i class="fas fa-layer-group"></i> First Floor
-                </div>
-                <div class="slots-grid">
-                    <!-- EV Slots 11-15 -->
-                    <div class="slot ev" onclick="bookSlot(11, 'ev')">
-                        <div class="slot-id">EV 11 ⚡</div>
-                        <div class="slot-type ev-type">Available</div>
-                    </div>
-                    <div class="slot booked">
-                        <div class="slot-id">EV 12 ⚡</div>
-                        <div class="slot-type booked-type">Booked</div>
-                    </div>
-                    <div class="slot ev" onclick="bookSlot(13, 'ev')">
-                        <div class="slot-id">EV 13 ⚡</div>
-                        <div class="slot-type ev-type">Available</div>
-                    </div>
-                    <div class="slot ev" onclick="bookSlot(14, 'ev')">
-                        <div class="slot-id">EV 14 ⚡</div>
-                        <div class="slot-type ev-type">Available</div>
-                    </div>
-                    <div class="slot ev" onclick="bookSlot(15, 'ev')">
-                        <div class="slot-id">EV 15 ⚡</div>
-                        <div class="slot-type ev-type">Available</div>
-                    </div>
-                </div>
-                
-                <div class="road">Main Road</div>
-                
-                <div class="slots-grid">
-                    <!-- Normal Slots 16-20 -->
-                    <div class="slot normal" onclick="bookSlot(16, 'normal')">
-                        <div class="slot-id">Slot 16</div>
-                        <div class="slot-type normal-type">Available</div>
-                    </div>
-                    <div class="slot normal" onclick="bookSlot(17, 'normal')">
-                        <div class="slot-id">Slot 17</div>
-                        <div class="slot-type normal-type">Available</div>
-                    </div>
-                    <div class="slot booked">
-                        <div class="slot-id">Slot 18</div>
-                        <div class="slot-type booked-type">Booked</div>
-                    </div>
-                    <div class="slot normal" onclick="bookSlot(19, 'normal')">
-                        <div class="slot-id">Slot 19</div>
-                        <div class="slot-type normal-type">Available</div>
-                    </div>
-                    <div class="slot normal" onclick="bookSlot(20, 'normal')">
-                        <div class="slot-id">Slot 20</div>
-                        <div class="slot-type normal-type">Available</div>
-                    </div>
-                </div>
+            <div id="dynamicPricingBadge" style="display:flex; align-items:center; gap:0.5rem;">
+                <span class="badge badge-ai"><i class="fas fa-bolt"></i> Live Rate: ₹50/hr</span>
             </div>
         </div>
-    </div>
 
+        <!-- Legend -->
+        <div class="legend-strip">
+            <div class="legend-item"><div class="legend-color" style="background:#93c5fd; border:1px solid #2563eb;"></div> Available Standard</div>
+            <div class="legend-item"><div class="legend-color" style="background:var(--ev-green-light); border:1px solid var(--ev-green);"></div> EV Fast Charger</div>
+            <div class="legend-item"><div class="legend-color" style="background:#cbd5e1;"></div> Occupied</div>
+            <div class="legend-item"><div class="legend-color" style="background:var(--warning-light); border:1px solid var(--warning);"></div> Reserved</div>
+            <div class="legend-item"><div class="legend-color" style="background:var(--danger-light); border:1px solid var(--danger);"></div> Maintenance</div>
+        </div>
+
+        <!-- Floors & Slots Grid -->
+        <div id="floorsContainer">
+            <div style="text-align: center; padding: 3rem;">
+                <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary);"></i>
+                <p style="margin-top: 1rem; color: var(--text-muted);">Synchronizing with IoT sensors...</p>
+            </div>
+        </div>
+
+        <!-- Sticky Drawer for Selected Slot -->
+        <div class="selected-drawer" id="selectedDrawer">
+            <div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">SELECTED SPOT</div>
+                <div style="font-size: 1.3rem; font-weight: 800; color: var(--primary);" id="drawerSlotNum">Slot A01</div>
+                <div style="font-size: 0.85rem; color: var(--text-main);" id="drawerSlotDetails">Ground Floor • EV Fast Charger (50 kW)</div>
+            </div>
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+                <div style="text-align:right; margin-right:1rem;">
+                    <div style="font-size: 1.2rem; font-weight: 800; color: var(--primary);" id="drawerRate">₹50/hr</div>
+                    <div style="font-size: 0.75rem; color: var(--ev-green); font-weight: 600;">Available Now</div>
+                </div>
+                <button onclick="proceedToBooking()" class="btn btn-primary btn-lg"><i class="fas fa-arrow-right"></i> Reserve This Spot</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-bottom" style="margin-top:0; border:none;">
+            <span>© 2026 SmartPark AI Platform. All rights reserved.</span>
+            <span>Real-Time Sensor Synchronized</span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/frontend/js/theme.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
     <script>
-        function bookSlot(slotNumber, type) {
-            window.location.href = `booking.html?slot=${slotNumber}&type=${type}`;
+        let selectedSlot = null;
+        let currentLocationData = null;
+
+        async function loadSlots() {
+            const locId = document.getElementById('locationSelect').value;
+            const container = document.getElementById('floorsContainer');
+            selectedSlot = null;
+            document.getElementById('selectedDrawer').style.display = 'none';
+
+            container.innerHTML = `
+                <div style="text-align: center; padding: 3rem;">
+                    <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary);"></i>
+                    <p style="margin-top: 1rem; color: var(--text-muted);">Fetching live slot statuses...</p>
+                </div>
+            `;
+
+            try {
+                // Fetch slots hierarchy and dynamic pricing concurrently
+                const [slotsRes, pricingRes] = await Promise.all([
+                    API.getLocationSlots(locId),
+                    API.getDynamicPriceQuote(locId, 1)
+                ]);
+
+                currentLocationData = slotsRes.location;
+
+                // Update pricing badge
+                if (pricingRes && pricingRes.success) {
+                    document.getElementById('dynamicPricingBadge').innerHTML = `
+                        <span class="badge badge-ai" title="${pricingRes.tierLabel}">
+                            <i class="fas fa-chart-line"></i> Rate: ₹${pricingRes.effectiveHourlyRate}/hr (${pricingRes.dynamicMultiplier}x ${pricingRes.tierLabel.split(' ')[0]})
+                        </span>
+                    `;
+                }
+
+                if (!slotsRes.floors || slotsRes.floors.length === 0) {
+                    container.innerHTML = `<div class="card" style="text-align:center; padding:2rem;">No parking floors configured for this location.</div>`;
+                    return;
+                }
+
+                container.innerHTML = slotsRes.floors.map(floor => `
+                    <div class="floor-card">
+                        <div class="floor-header">
+                            <div>
+                                <h3 style="font-weight: 700;"><i class="fas fa-layer-group" style="color:var(--primary);"></i> ${floor.floor_name}</h3>
+                                <span style="font-size: 0.85rem; color: var(--text-muted);">Level ${floor.floor_number}</span>
+                            </div>
+                            <span class="badge badge-primary">${floor.total_slots || 24} Slots</span>
+                        </div>
+
+                        ${floor.zones.map(zone => `
+                            <div class="zone-title"><i class="fas fa-vector-square"></i> ${zone.zone_name}</div>
+                            <div class="slots-container">
+                                ${zone.slots.map(slot => renderSlotBox(slot, floor.floor_name, zone.zone_name)).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                container.innerHTML = `<div class="card" style="color:var(--danger); text-align:center;">Failed to load slots: ${err.message}</div>`;
+            }
         }
+
+        function renderSlotBox(slot, floorName, zoneName) {
+            const isAvailable = slot.status === 'available';
+            const isEv = slot.slot_type === 'ev';
+            const isVip = slot.slot_type === 'vip';
+            const isDisabled = slot.slot_type === 'disabled';
+
+            let typeIcon = '<i class="fas fa-car"></i>';
+            if (isEv) typeIcon = '<i class="fas fa-bolt" style="color:var(--ev-green);"></i>';
+            if (isVip) typeIcon = '<i class="fas fa-crown" style="color:var(--warning);"></i>';
+            if (isDisabled) typeIcon = '<i class="fas fa-wheelchair" style="color:var(--info);"></i>';
+
+            let statusLabel = 'AVAILABLE';
+            if (slot.status === 'occupied') statusLabel = 'OCCUPIED';
+            if (slot.status === 'reserved') statusLabel = 'RESERVED';
+            if (slot.status === 'maintenance') statusLabel = 'MAINTENANCE';
+
+            const escapedData = JSON.stringify({
+                id: slot.id,
+                slotNumber: slot.slot_number,
+                slotType: slot.slot_type,
+                status: slot.status,
+                floorName,
+                zoneName,
+                powerKw: slot.power_kw,
+                ratePerKwh: slot.rate_per_kwh
+            }).replace(/"/g, '&quot;');
+
+            return `
+                <div class="slot-box ${slot.status} ${isEv ? 'ev' : ''}" 
+                     id="slot-box-${slot.id}"
+                     onclick='selectSlot(${escapedData})'>
+                    <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.25rem;">${slot.slot_number}</div>
+                    <div style="font-size: 1rem; margin-bottom: 0.4rem;">${typeIcon}</div>
+                    <span class="badge ${isAvailable ? 'badge-success' : (slot.status === 'occupied' ? 'badge-danger' : 'badge-warning')}" style="font-size:0.65rem;">
+                        ${statusLabel}
+                    </span>
+                    ${isEv ? `<div style="font-size:0.7rem; color:var(--ev-green-dark); font-weight:600; margin-top:0.25rem;">${slot.power_kw || 22} kW</div>` : ''}
+                </div>
+            `;
+        }
+
+        function selectSlot(slot) {
+            if (slot.status !== 'available') {
+                API.toast(`Slot ${slot.slotNumber} is currently ${slot.status}. Please choose an available slot.`, 'warning');
+                return;
+            }
+
+            // Remove previous selection highlight
+            document.querySelectorAll('.slot-box').forEach(el => el.classList.remove('selected'));
+
+            // Highlight newly selected box
+            const target = document.getElementById(`slot-box-${slot.id}`);
+            if (target) target.classList.add('selected');
+
+            selectedSlot = slot;
+
+            // Show Sticky Drawer
+            const drawer = document.getElementById('selectedDrawer');
+            document.getElementById('drawerSlotNum').innerText = `Slot ${slot.slotNumber}`;
+            document.getElementById('drawerSlotDetails').innerText = `${slot.floorName} • ${slot.zoneName} • ${slot.slotType.toUpperCase()} ${slot.powerKw ? `(${slot.powerKw} kW Fast Charger)` : ''}`;
+            document.getElementById('drawerRate').innerText = `₹${currentLocationData ? currentLocationData.base_hourly_rate : 50}/hr`;
+            drawer.style.display = 'flex';
+        }
+
+        function proceedToBooking() {
+            if (!selectedSlot) {
+                API.toast('Please pick an available slot first.', 'warning');
+                return;
+            }
+            const locId = document.getElementById('locationSelect').value;
+            window.location.href = `/booking.html?locationId=${locId}&slotId=${selectedSlot.id}&slotNumber=${selectedSlot.slotNumber}&isEv=${selectedSlot.slotType === 'ev'}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('locationId')) {
+                document.getElementById('locationSelect').value = urlParams.get('locationId');
+            }
+            loadSlots();
+        });
     </script>
 </body>
 </html>

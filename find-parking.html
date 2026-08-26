@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Parking — AI Smart Recommendations | SmartPark AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="/frontend/css/styles.css">
+    <style>
+        .filter-bar {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .parking-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+            display: flex;
+            flex-direction: column;
+        }
+        .parking-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .card-img-wrap {
+            height: 180px;
+            position: relative;
+            background: #cbd5e1;
+        }
+        .card-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card-body {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .ai-match-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .reason-box {
+            background: rgba(37, 99, 235, 0.06);
+            border-left: 3px solid var(--primary);
+            padding: 0.75rem;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            margin: 1rem 0;
+        }
+        /* Modal for Forecast */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-card {
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            max-width: 650px;
+            width: 90%;
+            padding: 2rem;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/index.html" class="brand-logo">
+                <i class="fas fa-car-side"></i>
+                <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
+            </a>
+            <nav class="nav-links" id="dynamic-nav-links"></nav>
+            <div class="nav-actions">
+                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon theme-icon"></i></button>
+                <div id="nav-auth-actions"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Discovery Section -->
+    <main class="main-wrapper">
+        <div style="margin-bottom: 2rem;">
+            <span class="badge badge-ai"><i class="fas fa-microchip"></i> Smart Recommendation Engine</span>
+            <h1 style="font-size: 2.2rem; font-weight: 800; margin-top: 0.5rem;">Discover Smart Parking Locations</h1>
+            <p style="color: var(--text-muted);">AI ranks available lots based on your GPS distance, EV charging needs, real-time slot vacancy, and dynamic price rates.</p>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-bar">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 120px; gap: 1rem; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Vehicle Type</label>
+                    <select id="filterVehicleType" class="form-control" onchange="fetchRecommendations()">
+                        <option value="car">Car / Sedan</option>
+                        <option value="suv">SUV / MUV</option>
+                        <option value="bike">Bike / Two-Wheeler</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">EV Fast Charging</label>
+                    <select id="filterEv" class="form-control" onchange="fetchRecommendations()">
+                        <option value="all">Any Slot Type</option>
+                        <option value="true">EV Chargers Only</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Max Budget (₹/hr)</label>
+                    <select id="filterMaxPrice" class="form-control" onchange="fetchRecommendations()">
+                        <option value="150">All Prices (₹150)</option>
+                        <option value="70">Budget (₹70/hr)</option>
+                        <option value="50">Economy (₹50/hr)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Sort By</label>
+                    <select id="filterSort" class="form-control" onchange="renderLocations(window.lastLoadedLocations)">
+                        <option value="ai">AI Match % (Highest)</option>
+                        <option value="distance">Distance (Nearest)</option>
+                        <option value="price">Price (Lowest)</option>
+                        <option value="available">Availability (Most Spots)</option>
+                    </select>
+                </div>
+                <button onclick="fetchRecommendations()" class="btn btn-primary" style="height: 44px;"><i class="fas fa-sync-alt"></i> Refresh</button>
+            </div>
+        </div>
+
+        <!-- Locations Grid -->
+        <div class="grid-2" id="locationsContainer">
+            <div style="text-align: center; grid-column: 1 / -1; padding: 3rem;">
+                <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary);"></i>
+                <p style="margin-top: 1rem; color: var(--text-muted);">Consulting AI recommendation model and fetching live slot states...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Forecast Modal -->
+    <div class="modal-overlay" id="forecastModal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
+                <h3 id="modalLocName" style="font-weight: 700;">24-Hour Parking Demand Forecast</h3>
+                <button onclick="closeForecastModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+            </div>
+            <div id="modalInsight" style="padding:1rem; border-radius:var(--radius-md); background:rgba(37,99,235,0.08); margin-bottom:1.5rem; font-size:0.95rem;"></div>
+            <div id="forecastHoursList" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-bottom" style="margin-top:0; border:none;">
+            <span>© 2026 SmartPark AI Platform. All rights reserved.</span>
+            <span>AI Multi-Criteria Optimization Engine</span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/frontend/js/theme.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
+    <script>
+        let lastLoadedLocations = [];
+
+        async function fetchRecommendations() {
+            const container = document.getElementById('locationsContainer');
+            container.innerHTML = `
+                <div style="text-align: center; grid-column: 1 / -1; padding: 3rem;">
+                    <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary);"></i>
+                    <p style="margin-top: 1rem; color: var(--text-muted);">Consulting AI recommendation model...</p>
+                </div>
+            `;
+
+            const isEv = document.getElementById('filterEv').value === 'true';
+            const vehicleType = document.getElementById('filterVehicleType').value;
+            const maxPrice = document.getElementById('filterMaxPrice').value;
+
+            try {
+                const res = await API.getRecommendations({
+                    lat: 13.0500,
+                    lon: 80.2400,
+                    isEv,
+                    vehicleType,
+                    maxPrice
+                });
+
+                if (res && res.recommendations) {
+                    window.lastLoadedLocations = res.recommendations;
+                    renderLocations(window.lastLoadedLocations);
+                }
+            } catch (err) {
+                container.innerHTML = `<div class="card" style="grid-column: 1 / -1; text-align: center; color: var(--danger);">Failed to load recommendations: ${err.message}</div>`;
+            }
+        }
+
+        function renderLocations(locations) {
+            const container = document.getElementById('locationsContainer');
+            if (!locations || locations.length === 0) {
+                container.innerHTML = `<div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">No parking locations matched your filter criteria.</div>`;
+                return;
+            }
+
+            const sortBy = document.getElementById('filterSort').value;
+            let sorted = [...locations];
+            if (sortBy === 'distance') sorted.sort((a, b) => a.distanceMeters - b.distanceMeters);
+            else if (sortBy === 'price') sorted.sort((a, b) => a.baseHourlyRate - b.baseHourlyRate);
+            else if (sortBy === 'available') sorted.sort((a, b) => b.availableSlots - a.availableSlots);
+            else sorted.sort((a, b) => b.aiMatchPercentage - a.aiMatchPercentage);
+
+            container.innerHTML = sorted.map(loc => `
+                <div class="parking-card">
+                    <div class="card-img-wrap">
+                        <img src="${loc.imageUrl || 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=600'}" alt="${loc.name}" loading="lazy">
+                        <div class="ai-match-badge"><i class="fas fa-sparkles"></i> ${loc.aiMatchPercentage}% AI Match</div>
+                    </div>
+                    <div class="card-body">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.5rem;">
+                            <div>
+                                <h3 style="font-size: 1.25rem; font-weight: 700;">${loc.name}</h3>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;"><i class="fas fa-map-pin" style="color:var(--danger);"></i> ${loc.address}, ${loc.city} (${loc.distanceKm} km away)</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.3rem; font-weight: 800; color: var(--primary);">₹${loc.baseHourlyRate}<span style="font-size:0.75rem; color:var(--text-muted);">/hr</span></div>
+                                <div style="color: var(--warning); font-size: 0.85rem; font-weight: 600;"><i class="fas fa-star"></i> ${loc.rating} (${loc.reviewCount})</div>
+                            </div>
+                        </div>
+
+                        <!-- Amenities -->
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin: 0.5rem 0;">
+                            <span class="badge ${loc.availableSlots > 5 ? 'badge-success' : 'badge-warning'}">
+                                <i class="fas fa-parking"></i> ${loc.availableSlots} / ${loc.totalSlots} Slots Free
+                            </span>
+                            ${loc.hasEvCharging ? `<span class="badge badge-success"><i class="fas fa-bolt"></i> ${loc.evAvailableSlots || 0} EV Chargers</span>` : ''}
+                            ${loc.hasCoveredParking ? `<span class="badge badge-primary"><i class="fas fa-umbrella"></i> Covered Bay</span>` : ''}
+                        </div>
+
+                        <!-- Explainable AI Reasoning -->
+                        <div class="reason-box">
+                            <i class="fas fa-robot" style="color:var(--primary);"></i> <strong>AI Insight:</strong> ${loc.recommendationReason}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div style="display:flex; gap:0.75rem; margin-top:auto; padding-top:1rem;">
+                            <a href="/slots.html?locationId=${loc.id}" class="btn btn-secondary" style="flex:1;"><i class="fas fa-th"></i> View Slots</a>
+                            <a href="/booking.html?locationId=${loc.id}" class="btn btn-primary" style="flex:1;"><i class="fas fa-calendar-check"></i> Book Now</a>
+                            <button onclick="viewForecast(${loc.id}, '${loc.name}')" class="btn btn-secondary btn-sm" title="AI Occupancy Forecast"><i class="fas fa-chart-area"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function viewForecast(locId, name) {
+            document.getElementById('modalLocName').innerText = `${name} — AI Demand Forecast`;
+            document.getElementById('forecastModal').style.display = 'flex';
+            const list = document.getElementById('forecastHoursList');
+            list.innerHTML = '<div style="text-align:center; padding:1rem;"><i class="fas fa-spinner fa-spin"></i> Loading predictions...</div>';
+
+            try {
+                const res = await API.getDemandForecast(locId, 12);
+                document.getElementById('modalInsight').innerHTML = `<strong><i class="fas fa-brain"></i> Forecast Summary:</strong> ${res.aiInsight}`;
+                
+                list.innerHTML = res.forecast.map(f => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0.85rem; border-radius:var(--radius-sm); background:var(--bg-body); font-size:0.9rem;">
+                        <span style="font-weight:600;"><i class="fas fa-clock" style="color:var(--text-muted)"></i> ${f.hourLabel}</span>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <div style="width:120px; background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
+                                <div style="width:${f.predictedOccupancyPct}%; height:100%; background:${f.predictedOccupancyPct > 80 ? 'var(--danger)' : (f.predictedOccupancyPct > 60 ? 'var(--warning)' : 'var(--ev-green)')}"></div>
+                            </div>
+                            <span style="font-weight:700; width:45px; text-align:right;">${f.predictedOccupancyPct}%</span>
+                            <span class="badge ${f.predictedOccupancyPct > 80 ? 'badge-danger' : (f.predictedOccupancyPct > 60 ? 'badge-warning' : 'badge-success')}">${f.demandLevel}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                list.innerHTML = '<div style="color:var(--danger)">Failed to load occupancy forecast.</div>';
+            }
+        }
+
+        function closeForecastModal() {
+            document.getElementById('forecastModal').style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('vehicleType')) document.getElementById('filterVehicleType').value = urlParams.get('vehicleType');
+            if (urlParams.get('isEv') === 'true') document.getElementById('filterEv').value = 'true';
+            fetchRecommendations();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard | SmartPark AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="/frontend/css/styles.css">
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .active-pass-hero {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .booking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .booking-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: var(--bg-body);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        .booking-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        .vehicle-chip {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        @media (max-width: 900px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/index.html" class="brand-logo">
+                <i class="fas fa-car-side"></i>
+                <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
+            </a>
+            <nav class="nav-links" id="dynamic-nav-links"></nav>
+            <div class="nav-actions">
+                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon theme-icon"></i></button>
+                <div id="nav-auth-actions"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <!-- Welcome Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <span class="badge badge-primary"><i class="fas fa-user-check"></i> Customer Portal</span>
+                <h1 style="font-size: 2.2rem; font-weight: 800; margin-top: 0.35rem;" id="dashWelcome">Welcome Back!</h1>
+                <p style="color: var(--text-muted);">Manage your active digital parking passes, reservation history, and registered garage vehicles.</p>
+            </div>
+            <a href="/find-parking.html" class="btn btn-primary"><i class="fas fa-plus-circle"></i> New Parking Reservation</a>
+        </div>
+
+        <!-- Active Pass Banner -->
+        <div class="active-pass-hero" id="activePassBanner" style="display:none;">
+            <div>
+                <span class="badge" style="background:rgba(255,255,255,0.2); color:white; margin-bottom:0.5rem;"><i class="fas fa-satellite-dish"></i> ACTIVE DIGITAL PASS</span>
+                <h2 style="font-size: 1.8rem; font-weight: 800;" id="actSlotNum">Slot A01</h2>
+                <div style="font-size: 1rem; opacity:0.9;" id="actLocName">Downtown Metro Smart Deck</div>
+                <div style="font-size: 0.85rem; opacity:0.8; margin-top:0.35rem;" id="actVehiclePlate">Vehicle: TN-01-AB-1234</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div style="background:white; padding:0.5rem; border-radius:var(--radius-md);">
+                    <img id="actQrThumb" src="" alt="Pass QR" style="width:90px; height:90px; display:block;">
+                </div>
+                <a id="actPassLink" href="#" class="btn btn-secondary" style="color:var(--primary); font-weight:700;"><i class="fas fa-qrcode"></i> View Pass</a>
+            </div>
+        </div>
+
+        <!-- Dashboard Two-Column Layout -->
+        <div class="dashboard-grid">
+            <!-- Left: Booking History -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                    <h3 style="font-weight: 700;"><i class="fas fa-history" style="color:var(--primary)"></i> My Reservations</h3>
+                    <button onclick="loadUserBookings()" class="btn btn-secondary btn-sm"><i class="fas fa-sync-alt"></i></button>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="booking-table">
+                        <thead>
+                            <tr>
+                                <th>Booking Code</th>
+                                <th>Location & Slot</th>
+                                <th>Vehicle</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading reservation history...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right: Vehicle Garage & Notifications -->
+            <div>
+                <!-- Garage -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                        <h3 style="font-weight: 700;"><i class="fas fa-warehouse" style="color:var(--primary)"></i> My Garage</h3>
+                    </div>
+
+                    <div id="garageList"></div>
+
+                    <!-- Add Vehicle Form -->
+                    <form id="addVehicleForm" onsubmit="handleAddVehicle(event)" style="margin-top: 1.25rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.75rem;">Register New Vehicle</h4>
+                        <div class="form-group">
+                            <input type="text" id="newVehNum" class="form-control" placeholder="License Plate (e.g. TN-01-XX-9999)" style="text-transform:uppercase;" required>
+                        </div>
+                        <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem;">
+                            <select id="newVehType" class="form-control">
+                                <option value="car">Car / Sedan</option>
+                                <option value="suv">SUV</option>
+                                <option value="bike">Bike</option>
+                            </select>
+                            <label style="display:flex; align-items:center; gap:0.35rem; font-size:0.85rem; font-weight:600; cursor:pointer;">
+                                <input type="checkbox" id="newVehIsEv"> Is EV
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm" style="width:100%;"><i class="fas fa-plus"></i> Save to Garage</button>
+                    </form>
+                </div>
+
+                <!-- Notifications Card -->
+                <div class="card">
+                    <h3 style="font-weight: 700; margin-bottom: 1rem;"><i class="fas fa-bell" style="color:var(--warning)"></i> Activity Notifications</h3>
+                    <div id="notificationsList" style="display:flex; flex-direction:column; gap:0.6rem; font-size:0.85rem;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-bottom" style="margin-top:0; border:none;">
+            <span>© 2026 SmartPark AI Platform. All rights reserved.</span>
+            <span>Customer Fleet & Reservation Management</span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/frontend/js/theme.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
+    <script>
+        async function initializeDashboard() {
+            if (!Auth.requireAuth()) return;
+            const user = Auth.getUser();
+            if (user) {
+                document.getElementById('dashWelcome').innerText = `Welcome Back, ${user.name}!`;
+            }
+            loadUserBookings();
+            loadUserVehicles();
+            loadNotifications();
+        }
+
+        async function loadUserBookings() {
+            const tbody = document.getElementById('bookingsTableBody');
+            try {
+                const res = await API.getMyBookings();
+                if (!res.bookings || res.bookings.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">No reservations found yet. Find a spot and book now!</td></tr>`;
+                    return;
+                }
+
+                // Check for active pass
+                const active = res.bookings.find(b => b.status === 'active' || b.status === 'confirmed');
+                if (active) {
+                    document.getElementById('activePassBanner').style.display = 'flex';
+                    document.getElementById('actSlotNum').innerText = `Slot ${active.slot_number} (${active.slot_type.toUpperCase()})`;
+                    document.getElementById('actLocName').innerText = active.location_name;
+                    document.getElementById('actVehiclePlate').innerText = `Vehicle: ${active.vehicle_number || 'Registered Car'}`;
+                    document.getElementById('actQrThumb').src = `https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(active.qr_token || active.booking_code)}`;
+                    document.getElementById('actPassLink').href = `/bill.html?code=${active.booking_code}`;
+                }
+
+                tbody.innerHTML = res.bookings.map(b => {
+                    let statusBadge = `<span class="badge badge-primary">${b.status}</span>`;
+                    if (b.status === 'active' || b.status === 'confirmed') statusBadge = `<span class="badge badge-success">${b.status}</span>`;
+                    if (b.status === 'cancelled') statusBadge = `<span class="badge badge-danger">${b.status}</span>`;
+
+                    return `
+                        <tr>
+                            <td><strong style="color:var(--primary);">${b.booking_code}</strong></td>
+                            <td>
+                                <div><strong>${b.slot_number}</strong> (${b.slot_type})</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted);">${b.location_name}</div>
+                            </td>
+                            <td>${b.vehicle_number || '-'}</td>
+                            <td><strong>₹${b.total_amount.toFixed(2)}</strong></td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                <div style="display:flex; gap:0.4rem;">
+                                    <a href="/bill.html?code=${b.booking_code}" class="btn btn-secondary btn-sm" title="View Digital Pass"><i class="fas fa-qrcode"></i></a>
+                                    ${(b.status === 'confirmed' || b.status === 'active') ? `
+                                        <button onclick="cancelBooking(${b.id})" class="btn btn-outline btn-sm" style="color:var(--danger); border-color:var(--danger);" title="Cancel"><i class="fas fa-times"></i></button>
+                                    ` : ''}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="6" style="color:var(--danger); text-align:center;">Failed to load bookings: ${e.message}</td></tr>`;
+            }
+        }
+
+        async function cancelBooking(id) {
+            if (!confirm('Are you sure you want to cancel this booking? Slot will be released.')) return;
+            try {
+                await API.cancelBooking(id);
+                API.toast('Reservation cancelled successfully.', 'success');
+                loadUserBookings();
+            } catch (e) {
+                // handled by api toast
+            }
+        }
+
+        async function loadUserVehicles() {
+            const list = document.getElementById('garageList');
+            try {
+                const res = await API.request('/vehicles');
+                if (!res.vehicles || res.vehicles.length === 0) {
+                    list.innerHTML = `<div style="color:var(--text-muted); font-size:0.85rem; padding:0.5rem 0;">No vehicles in garage. Add one below.</div>`;
+                    return;
+                }
+
+                list.innerHTML = res.vehicles.map(v => `
+                    <div class="vehicle-chip">
+                        <div>
+                            <div style="font-weight:700;">${v.vehicle_number}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">${v.vehicle_type.toUpperCase()} ${v.is_ev ? '• ⚡ Electric' : ''}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            ${v.is_default ? '<span class="badge badge-primary">Default</span>' : `<button onclick="setDefaultVehicle(${v.id})" class="btn btn-secondary btn-sm" style="font-size:0.75rem;">Set Default</button>`}
+                            <button onclick="deleteVehicle(${v.id})" style="background:none; border:none; color:var(--danger); cursor:pointer;"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                list.innerHTML = `<div style="color:var(--danger)">Failed to load vehicles.</div>`;
+            }
+        }
+
+        async function handleAddVehicle(e) {
+            e.preventDefault();
+            const vNum = document.getElementById('newVehNum').value.trim();
+            const vType = document.getElementById('newVehType').value;
+            const isEv = document.getElementById('newVehIsEv').checked;
+
+            try {
+                await API.request('/vehicles', {
+                    method: 'POST',
+                    body: JSON.stringify({ vehicleNumber: vNum, vehicleType: vType, isEv })
+                });
+                API.toast('Vehicle added to garage!', 'success');
+                document.getElementById('newVehNum').value = '';
+                loadUserVehicles();
+            } catch (e) {
+                // handled
+            }
+        }
+
+        async function deleteVehicle(id) {
+            try {
+                await API.request(`/vehicles/${id}`, { method: 'DELETE' });
+                API.toast('Vehicle deleted.', 'info');
+                loadUserVehicles();
+            } catch (e) {}
+        }
+
+        async function setDefaultVehicle(id) {
+            try {
+                await API.request(`/vehicles/${id}/default`, { method: 'PUT' });
+                API.toast('Default vehicle updated.', 'success');
+                loadUserVehicles();
+            } catch (e) {}
+        }
+
+        async function loadNotifications() {
+            const list = document.getElementById('notificationsList');
+            try {
+                const res = await API.request('/notifications');
+                if (!res.notifications || res.notifications.length === 0) {
+                    list.innerHTML = '<div style="color:var(--text-muted);">No new notifications.</div>';
+                    return;
+                }
+                list.innerHTML = res.notifications.slice(0, 5).map(n => `
+                    <div style="padding:0.6rem; background:var(--bg-body); border-radius:var(--radius-sm);">
+                        <strong style="color:var(--primary); font-size:0.85rem;">${n.title}</strong>
+                        <div style="color:var(--text-main);">${n.message}</div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                list.innerHTML = '<div style="color:var(--text-muted)">Failed to load notifications.</div>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+</html>
