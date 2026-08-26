@@ -3,13 +3,13 @@ const router = express.Router();
 const adminController = require('../controllers/adminController');
 const { authenticate, authorize } = require('../middleware/auth');
 
-// All admin routes require admin, manager, or superadmin
-router.use(authenticate, authorize('manager', 'admin', 'superadmin'));
+// Analytics — accessible to manager, admin, and superadmin
+router.get('/analytics/kpis',    authenticate, authorize('manager', 'admin', 'superadmin'), adminController.getAnalyticsKPIs);
+router.get('/analytics/charts',  authenticate, authorize('manager', 'admin', 'superadmin'), adminController.getAnalyticsCharts);
 
-router.get('/analytics/kpis', adminController.getAnalyticsKPIs);
-router.get('/analytics/charts', adminController.getAnalyticsCharts);
-router.get('/fraud-events', adminController.getFraudEvents);
-router.get('/audit-logs', adminController.getAuditLogs);
-router.put('/pricing-rules/:ruleId', adminController.updatePricingRule);
+// Sensitive operations — admin and superadmin only
+router.get('/fraud-events',              authenticate, authorize('admin', 'superadmin'), adminController.getFraudEvents);
+router.get('/audit-logs',               authenticate, authorize('admin', 'superadmin'), adminController.getAuditLogs);
+router.put('/pricing-rules/:ruleId',    authenticate, authorize('admin', 'superadmin'), adminController.updatePricingRule);
 
 module.exports = router;

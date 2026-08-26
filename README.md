@@ -1,9 +1,12 @@
 # SmartPark AI — Intelligent Cloud-Based Smart Parking Management Platform
 
-[![CI/CD Pipeline](https://github.com/ajithkumar31082004-bit/smart-parking-car/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/ajithkumar31082004-bit/smart-parking-car)
+[![CI/CD Pipeline](https://github.com/ajithkumar31082004-bit/smart-parking-car/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/ajithkumar31082004-bit/smart-parking-car/actions)
+[![Tests](https://img.shields.io/badge/Tests-25%20Passing-brightgreen.svg)](#)
+[![SonarQube](https://img.shields.io/badge/SonarQube-Enabled-4E9BCD.svg)](https://sonarcloud.io)
+[![Trivy](https://img.shields.io/badge/Trivy-Docker%20Scan-blue.svg)](https://aquasecurity.github.io/trivy/)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-Published-2496ED.svg)](https://hub.docker.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-v22.x-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://www.python.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 [![AWS](https://img.shields.io/badge/AWS-Cloud--Ready-FF9900.svg)](https://aws.amazon.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -177,6 +180,46 @@ docker-compose up --build
 | **Staff** | `staff@smartpark.ai` | `Password@123` | Optical QR Gate Scanner Check-in/out (`/staff-scanner.html`) |
 | **Manager** | `manager@smartpark.ai` | `Password@123` | Floor & Slot Management, Revenue Reports |
 | **Customer** | `customer@smartpark.ai` | `Password@123` | Search, 3D Lot, Booking, Garage, Digital Passes (`/dashboard.html`) |
+
+---
+
+## 🔑 GitHub Secrets Setup
+
+Before the CI/CD pipeline can run, add these secrets under **Repository → Settings → Secrets and variables → Actions**:
+
+| Secret Name | Required | Description | How to Get |  
+| :--- | :---: | :--- | :--- |
+| `JWT_SECRET` | ✅ | 64-char random hex for JWT signing | Run: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`  |
+| `ALLOWED_ORIGINS` | ✅ | Comma-separated frontend URLs | e.g. `https://yourdomain.com,http://localhost:5000` |
+| `DOCKERHUB_USERNAME` | ✅ | Your Docker Hub username | [hub.docker.com](https://hub.docker.com) |
+| `DOCKERHUB_TOKEN` | ✅ | Docker Hub Access Token (not password) | Docker Hub → Account Settings → Security → New Access Token |
+| `EC2_HOST` | ✅ | Public IP or DNS of your EC2 instance | AWS Console → EC2 → Instances |
+| `EC2_USER` | ✅ | SSH username (`ubuntu` for Ubuntu AMIs) | Depends on your AMI |
+| `EC2_SSH_KEY` | ✅ | Full content of your `.pem` private key | Your downloaded `.pem` file content |
+| `SLACK_WEBHOOK_URL` | ✅ | Incoming Webhook URL | Slack → Apps → Incoming Webhooks |
+| `SONAR_TOKEN` | ✅ | SonarCloud project token | [sonarcloud.io](https://sonarcloud.io) → My Account → Security |
+| `SONAR_HOST_URL` | ✅ | SonarCloud URL | `https://sonarcloud.io` |
+
+> **EC2 one-time setup**: Create `/etc/smartpark.env` on your instance with the same env vars as `.env.example` (with real values). The deploy script reads this file automatically.
+
+---
+
+## 📸 Screenshots
+
+> _Run the app locally (`npm start`) and visit `http://localhost:5000` to see all pages._
+
+| Page | URL | Description |
+| :--- | :--- | :--- |
+| **Landing Page** | `/index.html` | Live KPI counters, AI search widget, enterprise features showcase |
+| **Smart Parking Discovery** | `/find-parking.html` | AI match %, explainability pills, 24h forecast modal |
+| **Live Slot Matrix** | `/slots.html` | Floor-by-floor grid with EV status & surge pricing badge |
+| **Smart Booking** | `/booking.html` | Dynamic surge calculator, vehicle picker, EV estimator |
+| **Payment Checkout** | `/payment.html` | UPI / Card / NetBanking / Cash, 10-min hold timer |
+| **Digital Pass & Invoice** | `/bill.html` | Optical QR pass, GST invoice, star review |
+| **Customer Dashboard** | `/dashboard.html` | Active pass, booking history, garage manager |
+| **Staff Gate Scanner** | `/staff-scanner.html` | Optical barcode check-in/out |
+| **Admin Analytics Suite** | `/admin.html` | Revenue KPIs, Chart.js graphs, fraud alerts, audit log |
+| **3D Digital Twin** | `/launch%203d%20demo.html` | Three.js interactive parking lot simulation |
 
 ---
 

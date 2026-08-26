@@ -305,11 +305,29 @@ exports.cancelBooking = async (req, res, next) => {
 // Submit rating and review
 exports.submitReview = async (req, res, next) => {
     try {
-        const { bookingId, locationId, rating, comment } = req.body;
+        const { bookingId, rating, comment } = req.body;
+        let { locationId } = req.body;
         const userId = req.user.id;
 
-        if (!locationId || !rating) {
-            return res.status(400).json({ success: false, error: 'Location ID and rating (1-5) are required.' });
+        if (!rating) {
+            return res.status(400).json({ success: false, error: 'Rating (1-5) is required.' });
+        }
+
+        // Auto-derive locationId from booking when not provided
+        if (!locationId && bookingId) {
+            const bk = await get(`
+                SELECT pf.location_id
+                FROM bookings b
+                JOIN parking_slots ps ON b.slot_id = ps.id
+                JOIN parking_zones pz ON ps.zone_id = pz.id
+                JOIN parking_floors pf ON pz.floor_id = pf.id
+                WHERE b.id = ?
+            `, [bookingId]);
+            if (bk) locationId = bk.location_id;
+        }
+
+        if (!locationId) {
+            return res.status(400).json({ success: false, error: 'locationId is required (or provide a valid bookingId to auto-derive it).' });
         }
 
         await run(`
@@ -323,7 +341,7 @@ exports.submitReview = async (req, res, next) => {
             await run(`UPDATE parking_locations SET rating = ?, review_count = ? WHERE id = ?`, [parseFloat(avg.avg_rating.toFixed(1)), avg.cnt, locationId]);
         }
 
-        res.json({
+        res.status(201).json({
             success: true,
             message: 'Thank you for your rating and feedback!'
         });

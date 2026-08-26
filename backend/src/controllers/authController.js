@@ -15,7 +15,7 @@ exports.register = async (req, res, next) => {
         // Check if email already exists
         const existing = await get('SELECT id FROM users WHERE email = ?', [email.toLowerCase().trim()]);
         if (existing) {
-            return res.status(400).json({ success: false, error: 'An account with this email already exists.' });
+            return res.status(409).json({ success: false, error: 'An account with this email already exists.' });
         }
 
         const passwordHash = await bcrypt.hash(password, 10);

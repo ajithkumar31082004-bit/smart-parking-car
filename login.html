@@ -1,138 +1,426 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In | SmartPark AI Platform</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <title>Login — SmartPark AI</title>
+    <meta name="description" content="Sign in to your SmartPark AI account to book parking, manage your vehicles, and view your digital passes.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="/frontend/css/styles.css">
     <style>
-        .auth-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 2.5rem;
-            max-width: 480px;
-            margin: 2rem auto;
-            box-shadow: var(--shadow-lg);
+        body { display: block; min-height: 100vh; }
+
+        .auth-page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
         }
-        .demo-roles-strip {
+
+        /* Left brand panel */
+        .auth-brand {
+            background: linear-gradient(135deg, #060d1f 0%, #0d1a3a 50%, #0a1628 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem 3.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-brand::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 70% 60% at 40% 30%, rgba(37,99,235,0.2) 0%, transparent 65%),
+                        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(99,102,241,0.15) 0%, transparent 60%);
+        }
+
+        .auth-brand-grid {
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(37,99,235,0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(37,99,235,0.05) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+
+        .auth-brand-content { position: relative; z-index: 1; }
+
+        .auth-logo {
+            display: flex; align-items: center; gap: 0.6rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem; font-weight: 700;
+            color: #fff; margin-bottom: 3rem;
+            text-decoration: none;
+        }
+        .auth-logo i { font-size: 1.6rem; background: linear-gradient(135deg, #60a5fa, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .auth-headline {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.4rem; font-weight: 800;
+            line-height: 1.15; color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .auth-headline span {
+            background: linear-gradient(135deg, #60a5fa, #818cf8, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        .auth-sub { color: #94a3b8; font-size: 1rem; line-height: 1.7; margin-bottom: 2.5rem; }
+
+        .auth-features { display: flex; flex-direction: column; gap: 0.9rem; }
+        .auth-feature {
+            display: flex; align-items: center; gap: 0.75rem;
+            color: #cbd5e1; font-size: 0.9rem;
+        }
+        .auth-feature-icon {
+            width: 32px; height: 32px;
+            background: rgba(37,99,235,0.2);
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            color: #60a5fa; font-size: 0.85rem; flex-shrink: 0;
+        }
+
+        .auth-social-proof {
+            margin-top: 3rem;
+            padding: 1.25rem 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: var(--radius-lg);
+            display: flex; align-items: center; gap: 1rem;
+        }
+
+        .social-avatars { display: flex; }
+        .social-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: var(--accent-gradient);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 700; color: #fff;
+            margin-left: -8px;
+        }
+        .social-avatar:first-child { margin-left: 0; }
+
+        .social-text { color: #94a3b8; font-size: 0.82rem; }
+        .social-text strong { color: #fff; }
+
+        /* Right: form panel */
+        .auth-form-panel {
             background: var(--bg-body);
-            padding: 1rem;
-            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+        }
+
+        .auth-form-card {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .auth-form-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem; font-weight: 800;
+            margin-bottom: 0.4rem;
+        }
+
+        .auth-form-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+        /* Role demo buttons */
+        .demo-roles {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-role-btn {
+            padding: 0.6rem 0.75rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            cursor: pointer;
+            text-align: left;
+            transition: all var(--transition-fast);
+            font-size: 0.82rem;
+        }
+
+        .demo-role-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+
+        .demo-role-btn .role-name { font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.4rem; }
+        .demo-role-btn .role-access { font-size: 0.74rem; color: var(--text-muted); margin-top: 1px; }
+
+        .demo-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .demo-label::before, .demo-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .password-wrapper { position: relative; }
+        .password-toggle {
+            position: absolute;
+            right: 0.85rem; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none;
+            color: var(--text-muted); cursor: pointer;
+            font-size: 0.9rem;
+            transition: color var(--transition-fast);
+        }
+        .password-toggle:hover { color: var(--primary); }
+
+        .remember-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-check {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.85rem; color: var(--text-muted); cursor: pointer;
+        }
+
+        .remember-check input { accent-color: var(--primary); }
+
+        .forgot-link { font-size: 0.85rem; color: var(--primary); font-weight: 600; }
+        .forgot-link:hover { text-decoration: underline; }
+
+        .auth-divider {
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .auth-divider::before, .auth-divider::after {
+            content: ''; position: absolute;
+            top: 50%; width: calc(50% - 1.5rem);
+            height: 1px; background: var(--border-color);
+        }
+        .auth-divider::before { left: 0; }
+        .auth-divider::after  { right: 0; }
+
+        .auth-signup-prompt {
+            text-align: center;
+            font-size: 0.88rem;
+            color: var(--text-muted);
             margin-top: 1.5rem;
-            border: 1px dashed var(--border-color);
+        }
+
+        .auth-signup-prompt a { font-weight: 700; color: var(--primary); }
+
+        @media (max-width: 900px) {
+            .auth-page { grid-template-columns: 1fr; }
+            .auth-brand { display: none; }
+            .auth-form-panel { padding: 2rem 1rem; min-height: 100vh; }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="app-header">
-        <div class="header-container">
-            <a href="/index.html" class="brand-logo">
-                <i class="fas fa-car-side"></i>
-                <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
-            </a>
-            <nav class="nav-links" id="dynamic-nav-links"></nav>
-            <div class="nav-actions">
-                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon theme-icon"></i></button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="main-wrapper">
-        <div class="auth-card">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div style="width: 50px; height: 50px; background: var(--primary-light); color: var(--primary); border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 0.75rem;">
-                    <i class="fas fa-user-lock"></i>
-                </div>
-                <h1 style="font-size: 1.8rem; font-weight: 800;">Welcome Back</h1>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in to access your digital parking passes and fleet management.</p>
-            </div>
-
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" id="email" class="form-control" placeholder="name@domain.com" required value="customer@smartpark.ai">
-                </div>
-
-                <div class="form-group">
-                    <div style="display:flex; justify-content:space-between;">
-                        <label class="form-label">Password</label>
-                        <a href="javascript:void(0)" onclick="alert('Demo reset instructions sent to email.')" style="font-size:0.8rem;">Forgot password?</a>
+    <div class="auth-page">
+        <!-- Left Brand Panel -->
+        <div class="auth-brand">
+            <div class="auth-brand-grid"></div>
+            <div class="auth-brand-content">
+                <a href="/index.html" class="auth-logo">
+                    <i class="fas fa-square-parking"></i>
+                    SmartPark AI
+                </a>
+                <h1 class="auth-headline">Welcome<br>back to <span>smart parking</span>.</h1>
+                <p class="auth-sub">Access your reservations, manage your vehicle garage, and get AI-powered recommendations every time you park.</p>
+                <div class="auth-features">
+                    <div class="auth-feature">
+                        <div class="auth-feature-icon"><i class="fas fa-robot"></i></div>
+                        <span>AI recommendations based on your history</span>
                     </div>
-                    <input type="password" id="password" class="form-control" placeholder="••••••••" required value="Password@123">
+                    <div class="auth-feature">
+                        <div class="auth-feature-icon"><i class="fas fa-qrcode"></i></div>
+                        <span>Instant QR digital passes on every booking</span>
+                    </div>
+                    <div class="auth-feature">
+                        <div class="auth-feature-icon"><i class="fas fa-charging-station"></i></div>
+                        <span>EV charging bundled with your slot</span>
+                    </div>
+                    <div class="auth-feature">
+                        <div class="auth-feature-icon"><i class="fas fa-bell"></i></div>
+                        <span>Real-time alerts for expiry &amp; pricing</span>
+                    </div>
                 </div>
-
-                <button type="submit" id="loginBtn" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
-                    <i class="fas fa-sign-in-alt"></i> Sign In
-                </button>
-            </form>
-
-            <div style="text-align: center; margin-top: 1.25rem; font-size: 0.9rem; color: var(--text-muted);">
-                Don't have an account? <a href="/signup.html" style="font-weight: 600;">Create account</a>
-            </div>
-
-            <!-- Quick Demo Credentials for Fast Evaluation -->
-            <div class="demo-roles-strip">
-                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
-                    ⚡ 1-Click Demo Logins:
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;">
-                    <button type="button" onclick="fillDemo('customer@smartpark.ai', 'Password@123')" class="btn btn-secondary btn-sm" style="font-size:0.75rem;"><i class="fas fa-user"></i> Customer</button>
-                    <button type="button" onclick="fillDemo('staff@smartpark.ai', 'Password@123')" class="btn btn-secondary btn-sm" style="font-size:0.75rem;"><i class="fas fa-qrcode"></i> Staff</button>
-                    <button type="button" onclick="fillDemo('manager@smartpark.ai', 'Password@123')" class="btn btn-secondary btn-sm" style="font-size:0.75rem;"><i class="fas fa-user-tie"></i> Manager</button>
-                    <button type="button" onclick="fillDemo('admin@smartpark.ai', 'Password@123')" class="btn btn-secondary btn-sm" style="font-size:0.75rem;"><i class="fas fa-shield-alt"></i> Admin</button>
+                <div class="auth-social-proof">
+                    <div class="social-avatars">
+                        <div class="social-avatar">PK</div>
+                        <div class="social-avatar">RS</div>
+                        <div class="social-avatar">AM</div>
+                        <div class="social-avatar">SK</div>
+                    </div>
+                    <div class="social-text">
+                        <strong>10,000+ sessions secured</strong><br>
+                        Join drivers already parking smarter.
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
 
-    <!-- Scripts -->
+        <!-- Right Form Panel -->
+        <div class="auth-form-panel">
+            <div class="auth-form-card">
+                <div style="text-align:center;margin-bottom:2rem">
+                    <a href="/index.html" class="brand-logo" style="justify-content:center;margin-bottom:1.25rem">
+                        <i class="fas fa-square-parking"></i> SmartPark<span>AI</span>
+                    </a>
+                    <h2 class="auth-form-title">Sign in</h2>
+                    <p class="auth-form-sub">Don't have an account? <a href="/signup.html" style="color:var(--primary);font-weight:600">Create one free →</a></p>
+                </div>
+
+                <!-- Demo quick-login buttons -->
+                <div class="demo-label">1-click demo login</div>
+                <div class="demo-roles">
+                    <button class="demo-role-btn" onclick="quickLogin('customer@smartpark.ai')">
+                        <div class="role-name"><i class="fas fa-user" style="color:var(--primary)"></i> Customer</div>
+                        <div class="role-access">Booking &amp; Garage</div>
+                    </button>
+                    <button class="demo-role-btn" onclick="quickLogin('admin@smartpark.ai')">
+                        <div class="role-name"><i class="fas fa-chart-bar" style="color:var(--accent)"></i> Admin</div>
+                        <div class="role-access">Analytics &amp; Pricing</div>
+                    </button>
+                    <button class="demo-role-btn" onclick="quickLogin('staff@smartpark.ai')">
+                        <div class="role-name"><i class="fas fa-qrcode" style="color:var(--slot-ev)"></i> Staff</div>
+                        <div class="role-access">Gate QR Scanner</div>
+                    </button>
+                    <button class="demo-role-btn" onclick="quickLogin('manager@smartpark.ai')">
+                        <div class="role-name"><i class="fas fa-cogs" style="color:var(--warning)"></i> Manager</div>
+                        <div class="role-access">Floor Management</div>
+                    </button>
+                </div>
+
+                <div class="demo-label">or sign in with email</div>
+
+                <!-- Login Form -->
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="loginEmail">Email address</label>
+                        <div class="form-control-icon">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" class="form-control" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Password</label>
+                        <div class="form-control-icon password-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password" style="padding-right:2.75rem">
+                            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="remember-row">
+                        <label class="remember-check">
+                            <input type="checkbox" id="rememberMe"> Remember me
+                        </label>
+                        <a href="#" class="forgot-link">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn btn-gradient btn-lg btn-block" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                </form>
+
+                <div class="auth-signup-prompt">
+                    New to SmartPark AI? <a href="/signup.html">Create a free account</a>
+                </div>
+
+                <!-- Error message -->
+                <div id="loginError" class="hidden" style="margin-top:1rem;padding:0.75rem 1rem;background:var(--slot-occupied-bg);border:1px solid var(--slot-occupied);border-radius:var(--radius-sm);color:var(--slot-occupied);font-size:0.85rem;display:flex;align-items:center;gap:0.5rem">
+                    <i class="fas fa-exclamation-circle"></i> <span id="loginErrorMsg"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
     <script src="/frontend/js/theme.js"></script>
     <script src="/frontend/js/api.js"></script>
-    <script src="/frontend/js/auth.js"></script>
     <script>
-        function fillDemo(email, pass) {
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = pass;
+        function togglePassword(id, btn) {
+            const input = document.getElementById(id);
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            btn.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+        }
+
+        function quickLogin(email) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = 'Password@123';
+        }
+
+        function roleRedirect(role) {
+            const routes = {
+                admin: '/admin.html',
+                staff: '/staff-scanner.html',
+                manager: '/admin.html',
+                customer: '/dashboard.html',
+                superadmin: '/admin.html'
+            };
+            window.location.href = routes[role] || '/dashboard.html';
         }
 
         async function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
             const btn = document.getElementById('loginBtn');
+            const errBox = document.getElementById('loginError');
+            const errMsg = document.getElementById('loginErrorMsg');
 
+            errBox.classList.add('hidden');
+            btn.innerHTML = '<span class="spinner"></span> Signing in...';
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
 
             try {
                 const res = await API.login(email, password);
                 if (res && res.token) {
-                    Auth.login(res.token, res.user);
-                    API.toast(`Welcome back, ${res.user.name}!`, 'success');
-
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const redirect = urlParams.get('redirect');
-
-                    setTimeout(() => {
-                        if (redirect) {
-                            window.location.href = redirect;
-                        } else if (res.user.role === 'admin' || res.user.role === 'manager' || res.user.role === 'superadmin') {
-                            window.location.href = '/admin.html';
-                        } else if (res.user.role === 'staff') {
-                            window.location.href = '/staff-scanner.html';
-                        } else {
-                            window.location.href = '/dashboard.html';
-                        }
-                    }, 500);
+                    localStorage.setItem('sp_token', res.token);
+                    localStorage.setItem('sp_user', JSON.stringify(res.user));
+                    showToast('Welcome back, ' + res.user.name + '!', 'success');
+                    setTimeout(() => roleRedirect(res.user.role), 800);
+                } else {
+                    throw new Error(res.error || 'Login failed. Please try again.');
                 }
             } catch (err) {
-                btn.disabled = false;
+                errMsg.textContent = err.message || 'Invalid email or password.';
+                errBox.classList.remove('hidden');
                 btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+                btn.disabled = false;
+            }
+        }
+
+        function showToast(msg, type = 'info') {
+            const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.innerHTML = `<i class="fas ${icons[type]} toast-icon"></i><span>${msg}</span>`;
+            document.getElementById('toastContainer').appendChild(t);
+            setTimeout(() => t.remove(), 3500);
+        }
+
+        // Redirect if already logged in
+        if (localStorage.getItem('sp_token')) {
+            const u = JSON.parse(localStorage.getItem('sp_user') || '{}');
+            if (u.role) {
+                const routes = { admin: '/admin.html', staff: '/staff-scanner.html', manager: '/admin.html', customer: '/dashboard.html', superadmin: '/admin.html' };
+                window.location.href = routes[u.role] || '/dashboard.html';
             }
         }
     </script>

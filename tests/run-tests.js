@@ -173,6 +173,93 @@ async function runTests() {
         });
         assert(forbiddenRes.status === 403, '17. Security Role Authorization Guard (403 Forbidden for Non-Admins)');
 
+        // ── EDGE CASE & NEGATIVE PATH TESTS ─────────────────────────────────
+
+        // Test 18: Duplicate email registration → 409 Conflict
+        const dupRegRes = await request('POST', '/api/auth/register', {
+            name: 'Duplicate User',
+            email: 'customer@smartpark.ai',  // already exists
+            password: 'Password@123',
+            phone: '+91 00000 00000'
+        });
+        assert(dupRegRes.status === 409, '18. Duplicate Email Registration Rejected (409 Conflict)');
+
+        // Test 19: Wrong password → 401 Unauthorized
+        const wrongPwdRes = await request('POST', '/api/auth/login', {
+            email: 'customer@smartpark.ai',
+            password: 'WrongPassword!'
+        });
+        assert(wrongPwdRes.status === 401, '19. Invalid Password Rejected (401 Unauthorized)');
+
+        // Test 20: Create booking without auth token → 401 Unauthorized
+        const unauthBookingRes = await request('POST', '/api/bookings', {
+            slotId: 5,
+            vehicleNumber: 'TN-01-XY-9999',
+            vehicleType: 'car',
+            durationHours: 1
+        });
+        assert(unauthBookingRes.status === 401, '20. Unauthenticated Booking Rejected (401 Unauthorized)');
+
+        // Test 21: Booking with a non-existent slotId → 400 or 404
+        const badSlotRes = await request('POST', '/api/bookings', {
+            slotId: 99999,
+            vehicleNumber: 'TN-01-AB-1234',
+            vehicleType: 'car',
+            durationHours: 1
+        }, { Authorization: `Bearer ${customerToken}` });
+        assert(badSlotRes.status === 400 || badSlotRes.status === 404, '21. Invalid Slot ID Booking Rejected (400/404)');
+
+        // Test 22: Cancel a booking belonging to the logged-in customer
+        // Create a fresh booking first, then cancel it
+        const freshBooking = await request('POST', '/api/bookings', {
+            slotId: 6,
+            vehicleNumber: 'TN-01-AB-1234',
+            vehicleType: 'car',
+            durationHours: 1
+        }, { Authorization: `Bearer ${customerToken}` });
+        let cancelOk = false;
+        if (freshBooking.status === 201 && freshBooking.body.booking) {
+            const cancelRes = await request('POST', `/api/bookings/${freshBooking.body.booking.id}/cancel`, null, {
+                Authorization: `Bearer ${customerToken}`
+            });
+            cancelOk = cancelRes.status === 200 && cancelRes.body.success === true;
+        }
+        assert(cancelOk, '22. Customer Booking Cancellation & Slot Release');
+
+        // Test 23: Submit a review for the completed booking (booking from test 14 is completed)
+        const reviewRes = await request('POST', '/api/bookings/review', {
+            bookingId: newBooking.id,
+            rating: 5,
+            comment: 'Excellent EV charging facilities!'
+        }, { Authorization: `Bearer ${customerToken}` });
+        assert(reviewRes.status === 201 || reviewRes.status === 200, '23. Customer Review Submission After Checkout');
+
+        // Test 24: Register a new vehicle in customer garage
+        const vehicleRes = await request('POST', '/api/vehicles', {
+            vehicleNumber: 'KA-05-MN-5678',
+            vehicleType: 'car',
+            vehicleName: 'Honda City',
+            isEv: false
+        }, { Authorization: `Bearer ${customerToken}` });
+        assert(vehicleRes.status === 201, '24. Customer Vehicle Registration in Garage');
+
+        // Test 25: Manager login & intermediate RBAC (can access locations but not admin KPIs)
+        const managerLoginRes = await request('POST', '/api/auth/login', {
+            email: 'manager@smartpark.ai',
+            password: 'Password@123'
+        });
+        const managerOk = managerLoginRes.status === 200 && managerLoginRes.body.user.role === 'manager';
+        let managerRBACOk = false;
+        if (managerOk) {
+            const managerToken = managerLoginRes.body.token;
+            const managerForbidden = await request('GET', '/api/admin/fraud-events', null, {
+                Authorization: `Bearer ${managerToken}`
+            });
+            // Manager is not admin — should be 403
+            managerRBACOk = managerForbidden.status === 403;
+        }
+        assert(managerOk && managerRBACOk, '25. Manager Role Login & Intermediate RBAC Guard');
+
         console.log(`\n======================================================`);
         console.log(`📊 TEST RESULTS: ${passed} PASSED, ${failed} FAILED`);
         console.log(`======================================================\n`);

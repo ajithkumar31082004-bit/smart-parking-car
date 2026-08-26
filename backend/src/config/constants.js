@@ -1,8 +1,17 @@
 require('dotenv').config();
 
+// --- Startup security guard ---
+const _jwtSecret = process.env.JWT_SECRET;
+if (!_jwtSecret || _jwtSecret.trim().length < 32) {
+    console.error('\n🚨 FATAL: JWT_SECRET is missing or too short (min 32 chars).');
+    console.error('   Generate one with: node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"');
+    console.error('   Then add it to your .env file.\n');
+    process.exit(1);
+}
+
 module.exports = {
     PORT: process.env.PORT || 5000,
-    JWT_SECRET: process.env.JWT_SECRET || 'smartpark_ai_super_secret_jwt_key_2026',
+    JWT_SECRET: _jwtSecret,
     JWT_EXPIRES_IN: '7d',
     ROLES: {
         CUSTOMER: 'customer',
