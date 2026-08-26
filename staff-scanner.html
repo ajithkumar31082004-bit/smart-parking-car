@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Gate QR Scanner & Verifier | SmartPark AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="/frontend/css/styles.css">
+    <style>
+        .scanner-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            max-width: 650px;
+            margin: 0 auto;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+        .scanner-viewport {
+            background: #0f172a;
+            border: 3px dashed var(--primary);
+            border-radius: var(--radius-md);
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            margin: 1.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .scanner-laser {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: #ef4444;
+            box-shadow: 0 0 12px #ef4444;
+            animation: laserScan 2s infinite linear;
+        }
+        @keyframes laserScan {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+        .result-box {
+            background: var(--bg-body);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            text-align: left;
+            display: none;
+            border-left: 4px solid var(--ev-green);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/index.html" class="brand-logo">
+                <i class="fas fa-car-side"></i>
+                <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
+            </a>
+            <nav class="nav-links" id="dynamic-nav-links"></nav>
+            <div class="nav-actions">
+                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon theme-icon"></i></button>
+                <div id="nav-auth-actions"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div class="scanner-card">
+            <span class="badge badge-primary" style="margin-bottom:0.5rem;"><i class="fas fa-shield-alt"></i> Gate Security & Operations</span>
+            <h1 style="font-size: 2rem; font-weight: 800;">Optical Gate Scanner</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Verify visitor digital passes, confirm slot allocation, and trigger boom barrier entry/exit.</p>
+
+            <!-- Mode Switcher -->
+            <div style="display:flex; gap:0.5rem; justify-content:center; margin-top:1.5rem;">
+                <button id="btnModeCheckin" class="btn btn-primary" onclick="setMode('check-in')"><i class="fas fa-sign-in-alt"></i> Vehicle Check-In (Entry)</button>
+                <button id="btnModeCheckout" class="btn btn-secondary" onclick="setMode('check-out')"><i class="fas fa-sign-out-alt"></i> Vehicle Check-Out (Exit)</button>
+            </div>
+
+            <!-- Simulated Scanner Viewport -->
+            <div class="scanner-viewport">
+                <div class="scanner-laser"></div>
+                <i class="fas fa-qrcode fa-3x" style="color:var(--primary); margin-bottom:0.5rem;"></i>
+                <div style="font-size:0.9rem; font-weight:600;">Point Camera at Driver QR Pass</div>
+                <div style="font-size:0.75rem; color:#64748b;">Auto-detecting 2D barcode token signature...</div>
+            </div>
+
+            <!-- Code Input Form -->
+            <form onsubmit="handleScan(event)">
+                <div class="form-group">
+                    <label class="form-label" style="text-align:left;">Or Enter Booking Code / Pass Token Manually</label>
+                    <div style="display:flex; gap:0.5rem;">
+                        <input type="text" id="scanCodeInput" class="form-control" placeholder="e.g. SP-2026-000101" value="SP-2026-000101" style="text-transform:uppercase;" required>
+                        <button type="submit" id="btnVerify" class="btn btn-success" style="min-width:140px;"><i class="fas fa-check"></i> Validate Pass</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Quick Demo Tokens -->
+            <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; font-size:0.8rem; margin-top:1rem;">
+                <span style="color:var(--text-muted);">Quick Fill Demos:</span>
+                <a href="javascript:void(0)" onclick="quickFill('SP-2026-000101')" style="color:var(--primary); font-weight:600;">SP-2026-000101</a> |
+                <a href="javascript:void(0)" onclick="quickFill('SP-2026-000102')" style="color:var(--primary); font-weight:600;">SP-2026-000102</a> |
+                <a href="javascript:void(0)" onclick="quickFill('SP-2026-000103')" style="color:var(--primary); font-weight:600;">SP-2026-000103</a>
+            </div>
+
+            <!-- Validation Result Box -->
+            <div class="result-box" id="resultBox">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                    <div style="font-size:1.15rem; font-weight:800; color:var(--ev-green);" id="resHeader">
+                        <i class="fas fa-check-circle"></i> GATE UNLOCKED — VALID PASS
+                    </div>
+                    <span class="badge badge-success" id="resActionBadge">CHECK-IN</span>
+                </div>
+                <div class="grid-2" style="font-size:0.9rem;">
+                    <div>
+                        <div style="color:var(--text-muted); font-size:0.75rem;">DRIVER NAME</div>
+                        <div style="font-weight:700;" id="resCustName">Ajith Kumar</div>
+                    </div>
+                    <div>
+                        <div style="color:var(--text-muted); font-size:0.75rem;">ASSIGNED SPACE</div>
+                        <div style="font-weight:800; color:var(--primary);" id="resSlot">Slot A01 (EV Hub)</div>
+                    </div>
+                    <div>
+                        <div style="color:var(--text-muted); font-size:0.75rem;">VERIFIED VEHICLE</div>
+                        <div style="font-weight:700;" id="resVehicle">TN-01-AB-1234</div>
+                    </div>
+                    <div>
+                        <div style="color:var(--text-muted); font-size:0.75rem;">LOCATION DECK</div>
+                        <div style="font-weight:700;" id="resLocation">Downtown Metro Smart Deck</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-bottom" style="margin-top:0; border:none;">
+            <span>© 2026 SmartPark AI Platform. All rights reserved.</span>
+            <span>Gate Hardware API & POS Gateway Integration</span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/frontend/js/theme.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
+    <script>
+        let currentMode = 'check-in';
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('btnModeCheckin').className = mode === 'check-in' ? 'btn btn-primary' : 'btn btn-secondary';
+            document.getElementById('btnModeCheckout').className = mode === 'check-out' ? 'btn btn-primary' : 'btn btn-secondary';
+        }
+
+        function quickFill(code) {
+            document.getElementById('scanCodeInput').value = code;
+        }
+
+        async function handleScan(e) {
+            e.preventDefault();
+            const code = document.getElementById('scanCodeInput').value.trim();
+            const resultBox = document.getElementById('resultBox');
+            const btn = document.getElementById('btnVerify');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validating...';
+
+            try {
+                let res;
+                if (currentMode === 'check-in') {
+                    res = await API.staffCheckIn(code);
+                } else {
+                    res = await API.staffCheckOut(code);
+                }
+
+                if (res && res.success) {
+                    API.toast(res.message, 'success');
+                    resultBox.style.display = 'block';
+                    resultBox.style.borderLeftColor = 'var(--ev-green)';
+                    document.getElementById('resHeader').innerHTML = `<i class="fas fa-check-circle"></i> ${res.message.toUpperCase()}`;
+                    document.getElementById('resHeader').style.color = 'var(--ev-green)';
+                    document.getElementById('resActionBadge').innerText = currentMode.toUpperCase();
+                    document.getElementById('resCustName').innerText = res.booking.customerName;
+                    document.getElementById('resSlot').innerText = `Slot ${res.booking.slotNumber} (${res.booking.slotType || 'Normal'})`;
+                    document.getElementById('resVehicle').innerText = res.booking.vehicleNumber;
+                    document.getElementById('resLocation').innerText = res.booking.locationName;
+                }
+            } catch (err) {
+                resultBox.style.display = 'block';
+                resultBox.style.borderLeftColor = 'var(--danger)';
+                document.getElementById('resHeader').innerHTML = `<i class="fas fa-times-circle"></i> GATE DENIED: ${err.message}`;
+                document.getElementById('resHeader').style.color = 'var(--danger)';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check"></i> Validate Pass';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!Auth.requireAuth(['staff', 'manager', 'admin', 'superadmin'])) return;
+        });
+    </script>
+</body>
+</html>

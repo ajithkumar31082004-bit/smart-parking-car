@@ -3,824 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Confirmation | SmartPark AI</title>
+    <title>Digital Parking Pass & Invoice | SmartPark AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Using a different QR code library that's more reliable -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="/frontend/css/styles.css">
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --ev-green: #10b981;
-            --dark: #1f2937;
-            --light: #f9fafb;
-            --gray: #6b7280;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        body {
-            background-color: #f3f4f6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 1rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        .logo i {
-            color: var(--ev-green);
-        }
-        nav {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        nav a:hover {
-            color: #93c5fd;
-        }
-        .container {
-            max-width: 600px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-            flex: 1;
-        }
-        .receipt-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-        }
-        .receipt-header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 1.5rem;
-            text-align: center;
+        .invoice-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            max-width: 800px;
+            margin: 0 auto 2.5rem;
+            box-shadow: var(--shadow-lg);
             position: relative;
         }
-        .receipt-header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
+        .invoice-header {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .receipt-header p {
-            opacity: 0.9;
-        }
-        .receipt-body {
-            padding: 2rem;
-        }
-        .booking-details {
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1.5rem;
             margin-bottom: 2rem;
         }
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.8rem 0;
-            border-bottom: 1px dashed #e5e7eb;
-        }
-        .detail-row:last-child {
-            border-bottom: none;
-        }
-        .detail-label {
-            font-weight: 500;
-            color: var(--gray);
-        }
-        .detail-value {
-            font-weight: 600;
-            text-align: right;
-        }
-        .ev-badge {
-            background: var(--ev-green);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            margin-left: 0.5rem;
-        }
-        .charge-breakdown {
-            background: rgba(16, 185, 129, 0.05);
-            border-left: 3px solid var(--ev-green);
-            padding: 0.5rem 1rem;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-        }
-        .charge-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 0.3rem 0;
-        }
-        
-        /* Payment Section Styles */
-        .payment-section {
-            margin: 2rem 0;
-            padding: 1.5rem;
-            background: var(--light);
-            border-radius: 10px;
-            border-left: 4px solid var(--primary);
-        }
-        .payment-title {
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .payment-methods {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .payment-method {
-            padding: 1rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .payment-method:hover {
-            border-color: var(--primary);
-        }
-        .payment-method.selected {
-            border-color: var(--primary);
-            background-color: rgba(37, 99, 235, 0.05);
-        }
-        .payment-method i {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--primary);
-        }
-        .payment-form {
-            display: none;
-            margin-top: 1.5rem;
-        }
-        .payment-form.active {
-            display: block;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1rem;
-        }
-        .pay-btn {
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 1rem;
-        }
-        .pay-btn:hover {
-            background: var(--primary-dark);
-        }
-        
-        /* Gate Code Section (Initially Hidden) */
-        .gate-code-box {
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            border: 2px dashed var(--primary);
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            margin-top: 2rem;
-            position: relative;
-            display: none;
-        }
-        .gate-code-box.revealed {
-            display: block;
-        }
-        .gate-code-title {
-            font-size: 1rem;
-            color: var(--primary-dark);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .gate-code {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            letter-spacing: 0.2rem;
-            margin: 0.5rem 0;
-        }
-        .charging-status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            color: var(--ev-green);
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
-        .gate-instructions {
-            font-size: 0.9rem;
-            color: #4b5563;
-            margin-top: 1rem;
-        }
-        .additional-info {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: var(--light);
-            border-radius: 10px;
-        }
-        .info-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .info-list {
-            list-style-type: none;
-        }
-        .info-list li {
-            padding: 0.5rem 0;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-        .info-list li::before {
-            content: "•";
-            color: var(--primary);
-            font-weight: bold;
-        }
-        .actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-        .btn {
-            flex: 1;
-            padding: 1rem;
-            border-radius: 8px;
-            font-weight: 600;
-            text-align: center;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-        .btn-secondary {
+        .pass-qr-wrap {
             background: white;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-        }
-        .btn-secondary:hover {
-            background: #f3f4f6;
-            transform: translateY(-2px);
-        }
-        footer {
-            background: var(--dark);
-            color: white;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            border: 2px dashed var(--primary);
             text-align: center;
-            padding: 1.5rem;
-            margin-top: 2rem;
+            display: inline-block;
+            box-shadow: var(--shadow-sm);
         }
-        
-        /* QR Code Styles */
-        .qr-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .pass-qr-wrap img {
+            width: 170px;
+            height: 170px;
+            display: block;
+        }
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
             margin: 1.5rem 0;
         }
-        #qrCode {
-            width: 180px;
-            height: 180px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: white;
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .qr-instructions {
+        .invoice-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: var(--bg-body);
+            color: var(--text-muted);
             font-size: 0.85rem;
-            color: #4b5563;
-            margin-top: 0.8rem;
-            text-align: center;
-            max-width: 250px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        @media (max-width: 640px) {
-            header {
-                flex-direction: column;
-                padding: 1rem;
-            }
-            nav {
-                margin-top: 1rem;
-                justify-content: center;
-            }
-            .container {
-                padding: 0 1rem;
-                margin: 1rem auto;
-            }
-            .actions {
-                flex-direction: column;
-            }
-            .gate-code {
-                font-size: 2rem;
-            }
-            #qrCode {
-                width: 150px;
-                height: 150px;
-            }
-            .payment-methods {
-                grid-template-columns: 1fr;
-            }
-            .form-row {
-                grid-template-columns: 1fr;
-            }
+        .invoice-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+        .rating-stars {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            color: #d1d5db;
+            cursor: pointer;
+        }
+        .rating-stars i.active {
+            color: #f59e0b;
+        }
+        @media print {
+            header, footer, .no-print { display: none !important; }
+            .invoice-card { box-shadow: none; border: none; padding: 0; }
+            body { background: white; color: black; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <i class="fas fa-car"></i>
-            <span>SmartPark AI</span>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/index.html" class="brand-logo">
+                <i class="fas fa-car-side"></i>
+                <span>SmartPark<span style="color:var(--text-main)">AI</span></span>
+            </a>
+            <nav class="nav-links" id="dynamic-nav-links"></nav>
+            <div class="nav-actions">
+                <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-moon theme-icon"></i></button>
+                <div id="nav-auth-actions"></div>
+            </div>
         </div>
-        <nav>
-            <a href="index.html"><i class="fas fa-home"></i> Home</a>
-            <a href="slots.html"><i class="fas fa-map-marker-alt"></i> Parking Slots</a>
-            <a href="booking.html"><i class="fas fa-bookmark"></i> Book Now</a>
-        </nav>
     </header>
 
-    <div class="container">
-        <div class="receipt-card">
-            <div class="receipt-header">
-                <h1><i class="fas fa-check-circle"></i> Booking Confirmed</h1>
-                <p>Complete payment to get your access code</p>
-            </div>
-            
-            <div class="receipt-body">
-                <div class="booking-details" id="billDetails">
-                    <!-- Details will be inserted by JavaScript -->
-                </div>
-                
-                <!-- Payment Section -->
-                <div class="payment-section">
-                    <div class="payment-title">
-                        <i class="fas fa-credit-card"></i> Payment Method
-                    </div>
-                    
-                    <div class="payment-methods">
-                        <div class="payment-method" data-method="card">
-                            <i class="fas fa-credit-card"></i>
-                            <div>Credit Card</div>
-                        </div>
-                        <div class="payment-method" data-method="paypal">
-                            <i class="fab fa-paypal"></i>
-                            <div>PayPal</div>
-                        </div>
-                        <div class="payment-method" data-method="googlepay">
-                            <i class="fab fa-google-pay"></i>
-                            <div>Google Pay</div>
-                        </div>
-                        <div class="payment-method" data-method="applepay">
-                            <i class="fab fa-apple-pay"></i>
-                            <div>Apple Pay</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Credit Card Form -->
-                    <div class="payment-form" id="cardForm">
-                        <div class="form-group">
-                            <label for="cardNumber">Card Number</label>
-                            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
-                        </div>
-                        <div class="form-group">
-                            <label for="cardName">Name on Card</label>
-                            <input type="text" id="cardName" placeholder="John Doe">
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="expiryDate">Expiry Date</label>
-                                <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
-                            </div>
-                            <div class="form-group">
-                                <label for="cvv">CVV</label>
-                                <input type="text" id="cvv" placeholder="123" maxlength="3">
-                            </div>
-                        </div>
-                        <button class="pay-btn" id="payButton">
-                            <i class="fas fa-lock"></i> Pay Now
-                        </button>
-                    </div>
-                    
-                    <!-- Other payment method messages -->
-                    <div class="payment-form" id="otherMethodForm">
-                        <div class="info-title">
-                            <i class="fas fa-info-circle"></i> Redirecting to payment gateway
-                        </div>
-                        <p>You will be redirected to complete your payment securely.</p>
-                        <button class="pay-btn" id="simulatePayment">
-                            <i class="fas fa-external-link-alt"></i> Simulate Payment
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- EV Charging Instructions (only shown for EV slots) -->
-                <div id="evInstructions" class="additional-info" style="display:none;">
-                    <div class="info-title">
-                        <i class="fas fa-charging-station"></i> EV Charging Instructions
-                    </div>
-                    <ul class="info-list">
-                        <li>Plug in your vehicle to start charging automatically</li>
-                        <li>Charging will stop when your booking ends</li>
-                        <li>Monitor charging status in the SmartPark app</li>
-                    </ul>
-                </div>
-                
-                <!-- Gate Code Section (Initially Hidden) -->
-                <div class="gate-code-box" id="gateCodeSection">
-                    <div class="gate-code-title">
-                        <i class="fas fa-key"></i> Your Digital Gate Code
-                    </div>
-                    <div class="gate-code" id="gateCodeDisplay">
-                        <!-- Gate code will be inserted by JavaScript -->
-                    </div>
-                    <div id="chargingStatus" class="charging-status" style="display:none;">
-                        <i class="fas fa-bolt"></i> 
-                        <span>EV Charging Ready</span>
-                    </div>
-                    
-                    <!-- QR Code Container -->
-                    <div class="qr-container">
-                        <div id="qrCode"></div>
-                        <div class="qr-instructions">
-                            Scan this QR code at the parking gate for quick access
-                        </div>
-                    </div>
-                    
-                    <div class="gate-instructions">
-                        Enter the code above at the parking gate or scan the QR code
-                    </div>
-                </div>
-                
-                <div class="actions">
-                    <a href="index.html" class="btn btn-primary">
-                        <i class="fas fa-home"></i> Back to Home
-                    </a>
-                    <button class="btn btn-secondary" id="downloadBtn">
-                        <i class="fas fa-download"></i> Download Receipt
-                    </button>
-                </div>
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; max-width:800px; margin:0 auto 1.5rem;">
+            <a href="/dashboard.html" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> My Dashboard</a>
+            <div style="display:flex; gap:0.75rem;">
+                <button onclick="window.print()" class="btn btn-primary btn-sm"><i class="fas fa-print"></i> Print / Download PDF</button>
             </div>
         </div>
-    </div>
 
-    <footer>
-        <p>&copy; 2025 AI-IoT Smart Parking System. All rights reserved.</p>
+        <!-- Official Digital Pass Card -->
+        <div class="invoice-card" id="invoiceArea">
+            <div class="invoice-header">
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; color:var(--primary); font-weight:800; font-size:1.4rem; margin-bottom:0.25rem;">
+                        <i class="fas fa-car-side" style="color:var(--ev-green);"></i> SmartPark AI
+                    </div>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Official Digital Parking Pass & Tax Invoice</p>
+                    <span class="badge badge-success" style="margin-top:0.5rem;"><i class="fas fa-check-circle"></i> VERIFIED & ACTIVE</span>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.85rem; color:var(--text-muted);">BOOKING ID</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:var(--primary);" id="invBookingCode">SP-2026-000101</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;" id="invDate">Date: Aug 26, 2026</div>
+                </div>
+            </div>
+
+            <!-- Pass QR & Slot Highlights -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem; background:var(--bg-body); padding:1.5rem; border-radius:var(--radius-lg); margin-bottom:1.5rem;">
+                <div>
+                    <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Designated Space</span>
+                    <div style="font-size:2.4rem; font-weight:800; color:var(--primary); line-height:1;" id="invSlotNum">A01</div>
+                    <div style="font-size:0.95rem; font-weight:600; margin-top:0.35rem;" id="invLocName">Downtown Metro Smart Deck</div>
+                    <div style="font-size:0.85rem; color:var(--text-muted);" id="invFloorZone">Level G • Zone A (EV Hub)</div>
+                </div>
+                <div class="pass-qr-wrap">
+                    <img id="invQrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=SP-2026-000101" alt="Pass QR Code">
+                    <div style="font-size:0.75rem; font-weight:700; color:var(--primary); margin-top:0.4rem;">SCAN AT ENTRANCE GATE</div>
+                </div>
+            </div>
+
+            <!-- Driver & Vehicle Details -->
+            <div class="grid-2" style="margin-bottom:1.5rem;">
+                <div>
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">DRIVER DETAILS</div>
+                    <div style="font-weight:700;" id="invCustName">Ajith Kumar</div>
+                    <div style="font-size:0.85rem; color:var(--text-muted);" id="invCustPhone">+91 98765 43214</div>
+                </div>
+                <div>
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">VEHICLE & SLOT TYPE</div>
+                    <div style="font-weight:700;" id="invVehicleNum">TN-01-AB-1234 (Hyundai Ioniq 5)</div>
+                    <div style="font-size:0.85rem; color:var(--ev-green-dark); font-weight:600;" id="invSlotType">50 kW DC Fast Charging Slot</div>
+                </div>
+            </div>
+
+            <!-- Invoice Itemization -->
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Duration / Qty</th>
+                        <th>Rate</th>
+                        <th style="text-align:right;">Amount (INR)</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceItemsTable">
+                    <tr>
+                        <td>Smart Parking Space Reservation (Slot A01)</td>
+                        <td id="invDuration">2.0 Hours</td>
+                        <td>₹50.00 / hr</td>
+                        <td style="text-align:right;" id="invBaseCharge">₹100.00</td>
+                    </tr>
+                    <tr id="invEvRow">
+                        <td>EV Fast Charging Session (~20 kWh)</td>
+                        <td>1.0 Hour</td>
+                        <td>₹15.00 / kWh</td>
+                        <td style="text-align:right;" id="invEvCharge">₹75.00</td>
+                    </tr>
+                    <tr id="invDiscountRow" style="display:none; color:var(--ev-green-dark);">
+                        <td>Promo Discount Applied</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td style="text-align:right;" id="invDiscount">-₹20.00</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align:right; font-weight:600;">Goods & Services Tax (GST 18%)</td>
+                        <td style="text-align:right; font-weight:600;" id="invTax">₹31.50</td>
+                    </tr>
+                    <tr style="background:var(--bg-body); font-weight:800; font-size:1.15rem;">
+                        <td colspan="3" style="text-align:right; color:var(--primary);">Total Paid:</td>
+                        <td style="text-align:right; color:var(--primary);" id="invTotalAmount">₹206.50</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="font-size:0.8rem; color:var(--text-muted); border-top:1px solid var(--border-color); padding-top:1rem;">
+                <strong>Gate Instructions:</strong> Please present this QR code to the optical gate scanner at the entry boom barrier. Keep this digital pass active until exit checkout.
+            </div>
+        </div>
+
+        <!-- Rating & Review Card -->
+        <div class="card no-print" style="max-width:800px; margin:0 auto;">
+            <h3 style="font-weight:700; margin-bottom:0.5rem;"><i class="fas fa-star" style="color:var(--warning)"></i> Rate Your Parking Experience</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">Your review directly improves future AI recommendation scores for this parking deck.</p>
+            
+            <div class="rating-stars" id="starRatingGroup" style="margin-bottom:1rem;">
+                <i class="fas fa-star active" data-rating="1" onclick="setRating(1)"></i>
+                <i class="fas fa-star active" data-rating="2" onclick="setRating(2)"></i>
+                <i class="fas fa-star active" data-rating="3" onclick="setRating(3)"></i>
+                <i class="fas fa-star active" data-rating="4" onclick="setRating(4)"></i>
+                <i class="fas fa-star active" data-rating="5" onclick="setRating(5)"></i>
+            </div>
+
+            <div class="form-group">
+                <textarea id="reviewComment" class="form-control" rows="2" placeholder="Write a short review (e.g. fast EV charging, easy navigation, clean facility)..."></textarea>
+            </div>
+            <button onclick="submitReview()" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane"></i> Submit Feedback</button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer no-print">
+        <div class="footer-bottom" style="margin-top:0; border:none;">
+            <span>© 2026 SmartPark AI Platform. All rights reserved.</span>
+            <span>Digital QR Signature Verification Active</span>
+        </div>
     </footer>
 
+    <!-- Scripts -->
+    <script src="/frontend/js/theme.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get booking data from localStorage
-            const storedData = localStorage.getItem('bookingData');
-            
-            if (!storedData) {
-                alert('No booking data found. Please make a booking first.');
-                window.location.href = 'booking.html';
-                return;
-            }
-            
-            const bookingData = JSON.parse(storedData);
-            
-            const billDetails = document.getElementById('billDetails');
-            const gateCodeDisplay = document.getElementById('gateCodeDisplay');
-            const gateCodeSection = document.getElementById('gateCodeSection');
-            const evInstructions = document.getElementById('evInstructions');
-            const chargingStatus = document.getElementById('chargingStatus');
-            const qrCodeElement = document.getElementById('qrCode');
-            const downloadBtn = document.getElementById('downloadBtn');
-            
-            // Payment elements
-            const paymentMethods = document.querySelectorAll('.payment-method');
-            const cardForm = document.getElementById('cardForm');
-            const otherMethodForm = document.getElementById('otherMethodForm');
-            const payButton = document.getElementById('payButton');
-            const simulatePayment = document.getElementById('simulatePayment');
+        let currentBooking = null;
+        let selectedStars = 5;
 
-            let priceBreakdown = '';
-            let basePrice = 0;
-            let evCharge = 0;
-            let bookingRef = `SP-${Math.floor(100000 + Math.random() * 900000)}`;
-            
-            if (bookingData.bookingType === 'hour') {
-                const start = new Date(`2000-01-01T${bookingData.startTime}`);
-                const end = new Date(`2000-01-01T${bookingData.endTime}`);
-                const hours = (end - start) / (1000 * 60 * 60);
-                basePrice = hours * 50;
-                
-                if (bookingData.type === 'ev') {
-                    evCharge = hours * 20;
-                    priceBreakdown = `
-                        <div class="charge-breakdown">
-                            <div class="charge-item">
-                                <span>Base parking (${hours.toFixed(1)} hrs @ ₹50/hr):</span>
-                                <span>₹${basePrice}</span>
-                            </div>
-                            <div class="charge-item">
-                                <span>EV charging (${hours.toFixed(1)} hrs @ ₹20/hr):</span>
-                                <span>₹${evCharge}</span>
-                            </div>
-                            <div class="charge-item" style="font-weight:600;margin-top:0.5rem;">
-                                <span>Total Amount:</span>
-                                <span>₹${basePrice + evCharge}</span>
-                            </div>
-                        </div>
-                    `;
-                    evInstructions.style.display = 'block';
-                    chargingStatus.style.display = 'flex';
-                } else {
-                    priceBreakdown = `
-                        <div class="charge-breakdown">
-                            <div class="charge-item" style="font-weight:600;">
-                                <span>Total Amount:</span>
-                                <span>₹${basePrice}</span>
-                            </div>
-                        </div>
-                    `;
-                }
-            } else if (bookingData.bookingType === 'day') {
-                const start = new Date(bookingData.startDate);
-                const end = new Date(bookingData.endDate);
-                const days = ((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                basePrice = days * 300;
-                
-                if (bookingData.type === 'ev') {
-                    evCharge = days * 100;
-                    priceBreakdown = `
-                        <div class="charge-breakdown">
-                            <div class="charge-item">
-                                <span>Base parking (${days} days @ ₹300/day):</span>
-                                <span>₹${basePrice}</span>
-                            </div>
-                            <div class="charge-item">
-                                <span>EV charging (${days} days @ ₹100/day):</span>
-                                <span>₹${evCharge}</span>
-                            </div>
-                            <div class="charge-item" style="font-weight:600;margin-top:0.5rem;">
-                                <span>Total Amount:</span>
-                                <span>₹${basePrice + evCharge}</span>
-                            </div>
-                        </div>
-                    `;
-                    evInstructions.style.display = 'block';
-                    chargingStatus.style.display = 'flex';
-                } else {
-                    priceBreakdown = `
-                        <div class="charge-breakdown">
-                            <div class="charge-item" style="font-weight:600;">
-                                <span>Total Amount:</span>
-                                <span>₹${basePrice}</span>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
-            let evBadge = '';
-            if (bookingData.type === 'ev') {
-                evBadge = '<span class="ev-badge"><i class="fas fa-bolt"></i> EV Charging</span>';
-            }
-
-            billDetails.innerHTML = `
-                <div class="detail-row">
-                    <span class="detail-label">Booking Reference</span>
-                    <span class="detail-value">${bookingRef}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Parking Slot</span>
-                    <span class="detail-value">${bookingData.slot} ${evBadge}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Customer Name</span>
-                    <span class="detail-value">${bookingData.name}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Vehicle Number</span>
-                    <span class="detail-value">${bookingData.vehicle}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Booking Type</span>
-                    <span class="detail-value">${bookingData.bookingType === 'hour' ? 'Hourly Parking' : 'Daily Parking'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Duration</span>
-                    <span class="detail-value">${bookingData.durationText}</span>
-                </div>
-                ${priceBreakdown}
-                <div class="detail-row">
-                    <span class="detail-label">Booking Date</span>
-                    <span class="detail-value">${new Date().toLocaleDateString()}</span>
-                </div>
-            `;
-
-            // Payment method selection
-            paymentMethods.forEach(method => {
-                method.addEventListener('click', function() {
-                    // Remove selected class from all methods
-                    paymentMethods.forEach(m => m.classList.remove('selected'));
-                    // Add selected class to clicked method
-                    this.classList.add('selected');
-                    
-                    const methodType = this.getAttribute('data-method');
-                    
-                    // Show appropriate form
-                    if (methodType === 'card') {
-                        cardForm.classList.add('active');
-                        otherMethodForm.classList.remove('active');
-                    } else {
-                        cardForm.classList.remove('active');
-                        otherMethodForm.classList.add('active');
-                    }
-                });
+        function setRating(rating) {
+            selectedStars = rating;
+            const stars = document.querySelectorAll('#starRatingGroup i');
+            stars.forEach((s, idx) => {
+                s.classList.toggle('active', idx < rating);
             });
-            
-            // Format card number input
-            const cardNumberInput = document.getElementById('cardNumber');
-            if (cardNumberInput) {
-                cardNumberInput.addEventListener('input', function() {
-                    let value = this.value.replace(/\D/g, '');
-                    if (value.length > 16) value = value.slice(0, 16);
-                    
-                    // Add spaces every 4 characters
-                    let formattedValue = '';
-                    for (let i = 0; i < value.length; i++) {
-                        if (i > 0 && i % 4 === 0) formattedValue += ' ';
-                        formattedValue += value[i];
-                    }
-                    
-                    this.value = formattedValue;
+        }
+
+        async function loadPass() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code') || 'SP-2026-000101';
+
+            try {
+                const res = await API.getBookingPass(code);
+                if (res && res.booking) {
+                    currentBooking = res.booking;
+                    renderPass(currentBooking);
+                }
+            } catch (err) {
+                // Fallback to sample display if offline
+            }
+        }
+
+        function renderPass(b) {
+            document.getElementById('invBookingCode').innerText = b.booking_code;
+            document.getElementById('invSlotNum').innerText = b.slot_number;
+            document.getElementById('invLocName').innerText = b.location_name;
+            document.getElementById('invFloorZone').innerText = `${b.floor_name || 'Ground Floor'} • ${b.zone_name || 'Zone A'}`;
+            document.getElementById('invCustName').innerText = b.customer_name || 'Ajith Kumar';
+            document.getElementById('invCustPhone').innerText = b.customer_phone || '+91 98765 43214';
+            document.getElementById('invVehicleNum').innerText = `${b.vehicle_number || 'TN-01-AB-1234'} ${b.vehicle_brand ? `(${b.vehicle_brand} ${b.vehicle_model})` : ''}`;
+            document.getElementById('invSlotType').innerText = b.slot_type === 'ev' ? '⚡ EV Fast Charger Slot' : 'Standard Parking Slot';
+            document.getElementById('invDuration').innerText = `${b.duration_hours} Hours`;
+            document.getElementById('invBaseCharge').innerText = `₹${(b.base_charge || 100).toFixed(2)}`;
+            document.getElementById('invTax').innerText = `₹${(b.tax || 18).toFixed(2)}`;
+            document.getElementById('invTotalAmount').innerText = `₹${(b.total_amount || 118).toFixed(2)}`;
+
+            if (b.ev_charge > 0) {
+                document.getElementById('invEvRow').style.display = 'table-row';
+                document.getElementById('invEvCharge').innerText = `₹${b.ev_charge.toFixed(2)}`;
+            } else {
+                document.getElementById('invEvRow').style.display = 'none';
+            }
+
+            if (b.discount > 0) {
+                document.getElementById('invDiscountRow').style.display = 'table-row';
+                document.getElementById('invDiscount').innerText = `-₹${b.discount.toFixed(2)}`;
+            }
+
+            if (b.qrDataUrl) {
+                document.getElementById('invQrImg').src = b.qrDataUrl;
+            } else {
+                document.getElementById('invQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(b.qr_token || b.booking_code)}`;
+            }
+        }
+
+        async function submitReview() {
+            if (!currentBooking) return;
+            const comment = document.getElementById('reviewComment').value.trim();
+
+            try {
+                await API.submitReview({
+                    bookingId: currentBooking.id,
+                    locationId: currentBooking.location_id || 1,
+                    rating: selectedStars,
+                    comment
                 });
+                API.toast('Feedback submitted! Thank you for rating.', 'success');
+                document.getElementById('reviewComment').value = '';
+            } catch (err) {
+                // handled by api toast
             }
-            
-            // Format expiry date input
-            const expiryInput = document.getElementById('expiryDate');
-            if (expiryInput) {
-                expiryInput.addEventListener('input', function() {
-                    let value = this.value.replace(/\D/g, '');
-                    if (value.length > 4) value = value.slice(0, 4);
-                    
-                    if (value.length > 2) {
-                        this.value = value.slice(0, 2) + '/' + value.slice(2);
-                    } else {
-                        this.value = value;
-                    }
-                });
-            }
-            
-            // Handle payment
-            function processPayment() {
-                // Simulate payment processing
-                setTimeout(function() {
-                    // Show success message
-                    alert('Payment successful! Your booking is now confirmed.');
-                    
-                    // Reveal the gate code section
-                    gateCodeSection.classList.add('revealed');
-                    
-                    // Generate and display gate code
-                    gateCodeDisplay.textContent = bookingData.gateCode;
-                    
-                    // Generate QR Code
-                    const qrData = JSON.stringify({
-                        bookingRef: bookingRef,
-                        slot: bookingData.slot,
-                        gateCode: bookingData.gateCode,
-                        vehicle: bookingData.vehicle,
-                        validUntil: bookingData.bookingType === 'hour' ? 
-                            `${new Date().toLocaleDateString()} ${bookingData.endTime}` : 
-                            bookingData.endDate
-                    });
-                    
-                    // Create QR code with the library
-                    new QRCode(qrCodeElement, {
-                        text: qrData,
-                        width: 160,
-                        height: 160,
-                        colorDark : "#2563eb",
-                        colorLight : "#ffffff",
-                        correctLevel : QRCode.CorrectLevel.H
-                    });
-                }, 2000);
-            }
-            
-            // Add event listeners to payment buttons
-            if (payButton) {
-                payButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Basic validation for card payment
-                    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
-                    const cardName = document.getElementById('cardName').value;
-                    const expiryDate = document.getElementById('expiryDate').value;
-                    const cvv = document.getElementById('cvv').value;
-                    
-                    if (!cardNumber || cardNumber.length !== 16) {
-                        alert('Please enter a valid 16-digit card number');
-                        return;
-                    }
-                    
-                    if (!cardName) {
-                        alert('Please enter the name on your card');
-                        return;
-                    }
-                    
-                    if (!expiryDate || expiryDate.length !== 5) {
-                        alert('Please enter a valid expiry date (MM/YY)');
-                        return;
-                    }
-                    
-                    if (!cvv || cvv.length !== 3) {
-                        alert('Please enter a valid 3-digit CVV');
-                        return;
-                    }
-                    
-                    processPayment();
-                });
-            }
-            
-            if (simulatePayment) {
-                simulatePayment.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    processPayment();
-                });
-            }
-            
-            // Download receipt functionality
-            downloadBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                alert('Receipt downloaded successfully!');
-                // In a real application, this would generate and download a PDF
-            });
-        });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPass);
     </script>
 </body>
 </html>
