@@ -98,7 +98,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build Docker Image (no push yet — scan first)
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v7
       with:
         context: .
         push: false
@@ -123,7 +123,7 @@ jobs:
         sarif_file: trivy-results.sarif
 
     - name: Push Verified Image to Docker Hub
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v7
       with:
         context: .
         push: true
