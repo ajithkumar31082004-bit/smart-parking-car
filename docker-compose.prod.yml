@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # 1. SmartPark Node.js Application
+  smartpark-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartpark_ai_service
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "5000"
+    volumes:
+      - smartpark_data:/app/database
+    networks:
+      - smartpark-network
+
+  # 2. Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: smartpark_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - smartpark-app
+    networks:
+      - smartpark-network
+
+  # 3. Prometheus Monitoring Engine
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: smartpark_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - smartpark-network
+
+  # 4. Loki Log Aggregation Engine
+  loki:
+    image: grafana/loki:2.9.8
+    container_name: smartpark_loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+    command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - smartpark-network
+
+  # 5. Promtail Log Collector Agent
+  promtail:
+    image: grafana/promtail:2.9.8
+    container_name: smartpark_promtail
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/var/log:ro
+      - nginx_logs:/var/log/nginx:ro
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    depends_on:
+      - loki
+    networks:
+      - smartpark-network
+
+  # 6. Grafana Unified Dashboard UI
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: smartpark_grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - smartpark-network
+
+networks:
+  smartpark-network:
+    driver: bridge
+
+volumes:
+  smartpark_data:
+  nginx_logs:
+  prometheus_data:
+  grafana_data:
