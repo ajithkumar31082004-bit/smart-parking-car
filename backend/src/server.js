@@ -19,7 +19,7 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const app = express();
 
 // Security & Middlewares
-const _allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5000')
+const _allowedOrigins = (process.env.ALLOWED_ORIGINS || '*')
     .split(',')
     .map(o => o.trim())
     .filter(Boolean);
@@ -28,7 +28,9 @@ app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (server-to-server, curl, Postman)
         if (!origin) return callback(null, true);
-        if (_allowedOrigins.includes(origin)) return callback(null, true);
+        if (_allowedOrigins.includes('*') || _allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
         callback(new Error(`CORS: Origin '${origin}' is not permitted.`));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
