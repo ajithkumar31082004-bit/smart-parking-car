@@ -60,9 +60,11 @@ services:
 
   # 5. Promtail Log Collector Agent
   promtail:
-    image: grafana/promtail:2.9.8
+    image: grafana/promtail:3.0.0
     container_name: smartpark_promtail
     restart: unless-stopped
+    environment:
+      - DOCKER_API_VERSION=1.44
     volumes:
       - ./monitoring/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
