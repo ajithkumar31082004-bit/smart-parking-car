@@ -8,6 +8,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      - ALLOWED_ORIGINS=*
     ports:
       - "5000:5000"
     expose:
