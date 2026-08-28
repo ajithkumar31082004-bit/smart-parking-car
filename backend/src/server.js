@@ -26,12 +26,8 @@ const _allowedOrigins = (process.env.ALLOWED_ORIGINS || '*')
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests with no origin (server-to-server, curl, Postman)
-        if (!origin) return callback(null, true);
-        if (_allowedOrigins.includes('*') || _allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-        callback(new Error(`CORS: Origin '${origin}' is not permitted.`));
+        // Allow all origins dynamically (echo requesting origin for credentials support)
+        callback(null, true);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
