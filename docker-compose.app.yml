@@ -1,0 +1,30 @@
+services:
+  smartpark-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartpark_ai_service
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      - ALLOWED_ORIGINS=*
+
+    ports:
+      - "5000:5000"
+
+    volumes:
+      - smartpark_data:/app/database
+
+    networks:
+      - smartpark-network
+
+networks:
+  smartpark-network:
+    driver: bridge
+
+volumes:
+  smartpark_data:
+    driver: local
