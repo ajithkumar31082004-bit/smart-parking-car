@@ -1,0 +1,184 @@
+#!/bin/bash
+set -euo pipefail
+
+# Output all logs to console and logfile
+exec > >(tee -a /var/log/user_data.log | logger -t user-data -s 2>/dev/console) 2>&1
+
+echo "=========================================================="
+echo "Starting Smart Parking Application Deployment: $(date)"
+echo "=========================================================="
+
+# 1. Detect OS & Install Required Packages (Docker, Docker Compose, Git, Nginx)
+if command -v dnf >/dev/null 2>&1 || command -v yum >/dev/null 2>&1; then
+    echo "[1/6] Detected Amazon Linux / RHEL / Fedora environment..."
+    dnf update -y || yum update -y
+    dnf install -y docker git nginx curl || yum install -y docker git nginx curl
+    systemctl enable docker
+    systemctl start docker
+    usermod -aG docker ec2-user || true
+elif command -v apt-get >/dev/null 2>&1; then
+    echo "[1/6] Detected Ubuntu / Debian environment..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -y
+    apt-get install -y docker.io git nginx curl ca-certificates
+    systemctl enable docker
+    systemctl start docker
+    usermod -aG docker ubuntu || true
+fi
+
+# 2. Install Standalone Docker Compose v2
+echo "[2/6] Installing Docker Compose..."
+DOCKER_COMPOSE_VERSION="v2.24.5"
+curl -SL "https://github.com/docker/compose/releases/download/$${DOCKER_COMPOSE_VERSION}/docker-compose-linux-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+# 3. Setup Deployment Directory and Clone Repository
+APP_DIR="/opt/smart-parking"
+WEB_ROOT="/var/www/html"
+echo "[3/7] Setting up application directory at $APP_DIR and web root at $WEB_ROOT..."
+mkdir -p "$APP_DIR"
+mkdir -p "$WEB_ROOT"
+cd "$APP_DIR"
+
+REPO_URL="${app_repo_url}"
+BRANCH="${app_branch}"
+
+if [ ! -d "$APP_DIR/.git" ]; then
+    echo "Cloning repository $REPO_URL (branch: $BRANCH)..."
+    git clone -b "$BRANCH" "$REPO_URL" "$APP_DIR" || git clone "$REPO_URL" "$APP_DIR"
+else
+    echo "Repository already exists, fetching latest code..."
+    git -C "$APP_DIR" fetch --all
+    git -C "$APP_DIR" reset --hard origin/"$BRANCH" || true
+fi
+
+# 4. Deploy Frontend Static Web Files directly to Nginx Document Root
+echo "[4/7] Deploying Smart Parking Web Application frontend to $WEB_ROOT..."
+rm -rf "$${WEB_ROOT:?}"/*
+cp -r "$APP_DIR"/*.html "$WEB_ROOT/" 2>/dev/null || true
+cp -r "$APP_DIR"/frontend "$WEB_ROOT/" 2>/dev/null || true
+cp -r "$APP_DIR"/docs "$WEB_ROOT/" 2>/dev/null || true
+cp -r "$APP_DIR"/3d-demo.html "$WEB_ROOT/" 2>/dev/null || true
+
+# Set permissions for Nginx user (www-data or nginx)
+if id "www-data" >/dev/null 2>&1; then
+    chown -R www-data:www-data "$WEB_ROOT"
+elif id "nginx" >/dev/null 2>&1; then
+    chown -R nginx:nginx "$WEB_ROOT"
+fi
+chmod -R 755 "$WEB_ROOT"
+
+# 5. Generate Production .env Configuration
+echo "[5/7] Generating production .env file with AWS RDS and Cloud parameters..."
+cat <<'EOF' > "$APP_DIR/.env"
+# SmartPark AI Production Environment Configuration
+PORT=5000
+NODE_ENV=${environment}
+ALLOWED_ORIGINS=*
+
+# JWT Authentication
+JWT_SECRET=${jwt_secret}
+
+# Database Connection (AWS RDS MySQL 8.0)
+DB_HOST=${db_host}
+DB_PORT=${db_port}
+DB_NAME=${db_name}
+DB_USER=${db_user}
+DB_PASSWORD=${db_password}
+
+# AWS Cloud Integration
+AWS_REGION=${aws_region}
+S3_BUCKET_NAME=${s3_bucket_name}
+SNS_NOTIFICATION_ARN=${sns_topic_arn}
+SQS_QUEUE_URL=${sqs_queue_url}
+DYNAMODB_TABLE_NAME=${dynamodb_table_name}
+EOF
+
+chmod 600 "$APP_DIR/.env"
+
+# 6. Configure Systemd Service for Containerized Backend Stack
+echo "[6/7] Creating systemd service for containerized application stack..."
+cat <<'EOF' > /etc/systemd/system/smart-parking.service
+[Unit]
+Description=AIoT Smart Parking Application Stack
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/smart-parking
+ExecStart=/usr/local/bin/docker-compose -f docker-compose.prod.yml up -d --build --remove-orphans
+ExecStop=/usr/local/bin/docker-compose -f docker-compose.prod.yml down
+TimeoutStartSec=600
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable smart-parking.service
+
+# 7. Configure Nginx Web Server & Reverse Proxy
+echo "[7/7] Configuring Nginx Web Server and Reverse Proxy..."
+cat <<'EOF' > /etc/nginx/conf.d/smart-parking.conf
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    root /var/www/html;
+    index index.html index.htm;
+    client_max_body_size 50M;
+
+    # Serve static frontend web application files
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy API requests to Node.js backend container
+    location /api/ {
+        proxy_pass http://127.0.0.1:5000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Healthcheck endpoint
+    location /healthz {
+        access_log off;
+        return 200 "healthy\n";
+    }
+}
+EOF
+
+# Restart Nginx
+systemctl enable nginx
+nginx -t && systemctl restart nginx || echo "Nginx configuration reload warning"
+
+# 8. Start the Application Backend Stack
+echo "Starting Smart Parking Docker Compose stack..."
+cd "$APP_DIR"
+if [ -f "$APP_DIR/docker-compose.prod.yml" ]; then
+    /usr/local/bin/docker-compose -f docker-compose.prod.yml up -d --build --remove-orphans || systemctl start smart-parking.service || true
+elif [ -f "$APP_DIR/docker-compose.yml" ]; then
+    /usr/local/bin/docker-compose up -d --build --remove-orphans || systemctl start smart-parking.service || true
+fi
+
+systemctl restart nginx || true
+
+echo "=========================================================="
+echo "Deployment Complete! Status: $(date)"
+echo "Website Root: /var/www/html"
+echo "Backend Stack: /opt/smart-parking"
+echo "=========================================================="
+
