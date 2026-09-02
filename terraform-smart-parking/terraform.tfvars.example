@@ -1,0 +1,39 @@
+# AWS Deployment Configuration
+aws_region  = "us-east-1"
+environment = "production"
+
+# Network Configuration
+vpc_cidr            = "10.0.0.0/16"
+public_subnet_cidr  = "10.0.1.0/24"
+private_subnet_cidr = "10.0.2.0/24"
+enable_nat_gateway  = true
+
+# Compute (EC2) Configuration
+ec2_instance_type = "t3.micro"
+ec2_ami           = null # Set to specific AMI ID or leave null to use Amazon Linux 2023
+ssh_allowed_cidr  = "203.0.113.50/32" # In production, restrict this to your specific IP/bastion CIDR
+ec2_key_name      = null # "my-aws-ssh-key"
+
+# Database (RDS MySQL 8.0) Configuration
+rds_instance_class = "db.t3.micro"
+rds_database_name  = "smartparking"
+rds_username       = "dbadmin"
+rds_password       = "ChangeMeStrongPassword123!" # Required: specify a strong master password
+rds_storage        = 20
+rds_multi_az       = false # Set to true for multi-AZ high availability in production
+
+# Storage & Messaging Configuration
+s3_bucket_name      = "smart-parking-storage-bucket-prod-unique123" # Must be globally unique across AWS
+dynamodb_table_name = "smart-parking-transactions"
+sqs_queue_name      = "smart-parking-events"
+sns_topic_name      = "smart-parking-alerts"
+
+# Serverless (Lambda)
+lambda_runtime = "nodejs18.x"
+
+# Application Deployment Configuration
+app_repo_url = "https://github.com/ajithkumar31082004-bit/smart-parking-car.git"
+app_branch   = "main"
+jwt_secret   = "smartpark-ai-super-secret-jwt-token-prod-key-32chars"
+
+

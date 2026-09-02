@@ -1,0 +1,19 @@
+# ==============================================================================
+# S3 Remote State Backend with DynamoDB State Locking
+# ==============================================================================
+# To use this configuration:
+# 1. Create an S3 bucket (e.g., smart-parking-tfstate-<account-id>) with versioning enabled.
+# 2. Create a DynamoDB table named "terraform-lock" with a Partition key named "LockID" (Type: String).
+# 3. Rename this file to `backend.tf` (or uncomment and paste into your terraform block).
+# 4. Run `terraform init` to migrate your state to the remote S3 backend.
+# ==============================================================================
+
+terraform {
+  backend "s3" {
+    bucket         = "smart-parking-terraform-state-prod"
+    key            = "smart-parking/production/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "terraform-lock"
+  }
+}
