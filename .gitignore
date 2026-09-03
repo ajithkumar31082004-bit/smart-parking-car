@@ -1,0 +1,23 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Private keys / certificates
+*.pem
+*.key
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# Test / coverage
+coverage/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
