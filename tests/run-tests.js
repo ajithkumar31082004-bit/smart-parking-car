@@ -260,6 +260,53 @@ async function runTests() {
         }
         assert(managerOk && managerRBACOk, '25. Manager Role Login & Intermediate RBAC Guard');
 
+        // ── IOT EDGE & PROMETHEUS OBSERVABILITY TESTS ────────────────────────
+
+        // Test 26: Prometheus Metrics Endpoint (/metrics)
+        const metricsRes = await request('GET', '/metrics');
+        const metricsHasCounter = (metricsRes.text || '').includes('smartpark_http_requests_total') || (metricsRes.body && JSON.stringify(metricsRes.body).includes('smartpark'));
+        assert(metricsRes.status === 200 && metricsHasCounter, '26. Prometheus Metrics Endpoint (/metrics) Telemetry Exposure');
+
+        // Test 27: IoT Device Registration
+        const regDeviceRes = await request('POST', '/api/iot/register-device', {
+            deviceId: 'ESP32_SENSOR_A01',
+            slotId: 1,
+            deviceType: 'ultrasonic',
+            firmwareVersion: '2.1.0'
+        });
+        assert(regDeviceRes.status === 201 && regDeviceRes.body.success === true, '27. IoT Edge Device Registration (ESP32 Sensor Unit)');
+
+        // Test 28: ESP32 Ultrasonic Distance Event (Vehicle Detected -> Slot Occupied)
+        const sensorOccupiedRes = await request('POST', '/api/iot/sensor-event', {
+            deviceId: 'ESP32_SENSOR_A01',
+            slotId: 1,
+            distanceCm: 25
+        });
+        assert(sensorOccupiedRes.status === 200 && sensorOccupiedRes.body.data.state === 'occupied', '28. ESP32 Distance Event (<50cm) Transitions Slot to OCCUPIED');
+
+        // Test 29: ESP32 Ultrasonic Distance Event (Vehicle Departs -> Slot Available)
+        const sensorFreeRes = await request('POST', '/api/iot/sensor-event', {
+            deviceId: 'ESP32_SENSOR_A01',
+            slotId: 1,
+            distanceCm: 180
+        });
+        assert(sensorFreeRes.status === 200 && sensorFreeRes.body.data.state === 'free', '29. ESP32 Distance Event (>50cm) Releases Slot to AVAILABLE');
+
+        // Test 30: Automated Barrier Gate Servo Trigger
+        const gateRes = await request('POST', '/api/iot/gate/control', {
+            gateId: 'GATE_NORTH_ENTRY',
+            action: 'OPEN',
+            bookingCode: newBooking.bookingCode
+        });
+        assert(gateRes.status === 200 && gateRes.body.servoAngle === 90, '30. Automated Barrier Servo Gate Control (90 Degree Actuation)');
+
+        // Test 31: Real-Time IoT Telemetry Stream & Device Inventory
+        const telemetryRes = await request('GET', '/api/iot/telemetry');
+        const devicesRes = await request('GET', '/api/iot/devices');
+        const telemetryOk = telemetryRes.status === 200 && Boolean(telemetryRes.body.summary.totalSlots);
+        const devicesOk = devicesRes.status === 200 && Array.isArray(devicesRes.body.devices);
+        assert(telemetryOk && devicesOk, '31. Live IoT Occupancy Telemetry Stream & Edge Inventory');
+
         console.log(`\n======================================================`);
         console.log(`📊 TEST RESULTS: ${passed} PASSED, ${failed} FAILED`);
         console.log(`======================================================\n`);

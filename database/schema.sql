@@ -237,7 +237,32 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
--- 17. System Settings Table
+-- 17. IoT Devices Table
+CREATE TABLE IF NOT EXISTS iot_devices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    device_id TEXT UNIQUE NOT NULL,
+    slot_id INTEGER,
+    device_type TEXT NOT NULL DEFAULT 'ultrasonic' CHECK(device_type IN ('ultrasonic', 'camera_anpr', 'servo_gate', 'rfid_reader')),
+    status TEXT NOT NULL DEFAULT 'online' CHECK(status IN ('online', 'offline', 'warning')),
+    last_distance_cm INTEGER,
+    battery_percentage INTEGER DEFAULT 100,
+    firmware_version TEXT DEFAULT '1.0.0',
+    last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(slot_id) REFERENCES parking_slots(id) ON DELETE SET NULL
+);
+
+-- 18. Sensor Telemetry Table
+CREATE TABLE IF NOT EXISTS sensor_telemetry (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    device_id TEXT NOT NULL,
+    slot_id INTEGER,
+    distance_cm INTEGER NOT NULL,
+    detected_state TEXT NOT NULL CHECK(detected_state IN ('free', 'occupied', 'transient')),
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 19. System Settings Table
 CREATE TABLE IF NOT EXISTS system_settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL,
