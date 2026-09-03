@@ -51,23 +51,26 @@ pipeline {
     }
 }
         stage('3. SonarQube Analysis') {
-            steps {
-                echo '🔍 Running SonarQube analysis...'
+    steps {
+        echo '🔍 Running SonarQube analysis...'
 
-                script {
-                    withSonarQubeEnv("${SONARQUBE_SERVER_NAME}") {
-                        sh '''
-                            sonar-scanner \
-                              -Dsonar.projectKey=smartpark-car \
-                              -Dsonar.projectName="SmartPark AI" \
-                              -Dsonar.sources=. \
-                              -Dsonar.exclusions=node_modules/**,coverage/**,dist/** \
-                              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                        '''
-                    }
-                }
+        script {
+            def scannerHome = tool 'SonarQubeScanner'
+
+            withSonarQubeEnv('sonarqube-server') {
+                sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                      -Dsonar.projectKey=smartpark-car \
+                      -Dsonar.projectName='SmartPark AI' \
+                      -Dsonar.sources=. \
+                      -Dsonar.exclusions=node_modules/**,coverage/**,dist/** \
+                      -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                """
             }
         }
+    }
+}
+        
 
         stage('4. Docker Build') {
             steps {
