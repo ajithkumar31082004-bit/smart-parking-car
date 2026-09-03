@@ -1,7 +1,7 @@
 services:
   # 1. SmartPark Node.js Application
   smartpark-app:
-    image: ${DOCKER_IMAGE:-ajithkumar31082004/smartpark-ai:latest}
+    image: ${DOCKER_IMAGE:-ajithkumar3108/smartparkingcar:latest}
     build:
       context: .
       dockerfile: Dockerfile
