@@ -43,6 +43,7 @@ pipeline {
             )
         ]) {
             sh '''
+                export NODE_ENV=test
                 npm ci
                 npm test
             '''
