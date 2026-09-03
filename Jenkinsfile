@@ -33,16 +33,22 @@ pipeline {
         }
 
         stage('2. Install & Test') {
-            steps {
-                echo '🧪 Installing dependencies and running tests...'
+    steps {
+        echo '🧪 Installing dependencies and running tests...'
 
-                sh '''
-                    npm ci
-                    npm test
-                '''
-            }
+        withCredentials([
+            string(
+                credentialsId: 'smartpark-jwt-secret',
+                variable: 'JWT_SECRET'
+            )
+        ]) {
+            sh '''
+                npm ci
+                npm test
+            '''
         }
-
+    }
+}
         stage('3. SonarQube Analysis') {
             steps {
                 echo '🔍 Running SonarQube analysis...'
