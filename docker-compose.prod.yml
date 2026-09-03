@@ -97,7 +97,7 @@ services:
     networks:
       - smartpark-network
 
-  # 7. Grafana Unified Dashboard UI
+    # 7. Grafana Unified Dashboard UI
   grafana:
     image: grafana/grafana:10.4.2
     container_name: smartpark_grafana
@@ -117,6 +117,22 @@ services:
     networks:
       - smartpark-network
 
+  # 8. SonarQube Code Quality Platform
+  sonarqube:
+    image: sonarqube:community
+    container_name: smartpark_sonarqube
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - smartpark-network
+
 networks:
   smartpark-network:
     driver: bridge
@@ -126,3 +142,6 @@ volumes:
   nginx_logs:
   prometheus_data:
   grafana_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
