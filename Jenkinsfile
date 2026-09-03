@@ -5,8 +5,8 @@ pipeline {
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'
         SONARQUBE_SERVER_NAME    = 'sonarqube-server'
 
-        IMAGE_NAME = 'smartpark-ai'
-        DOCKER_USER = 'ajithkumar31082004'
+        IMAGE_NAME = 'smartparkingcar'
+        DOCKER_USER = 'ajithkumar3108'
 
         EC2_HOST = '13.207.153.69'
         EC2_USER = 'ubuntu'
