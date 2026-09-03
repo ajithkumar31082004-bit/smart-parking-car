@@ -73,3 +73,9 @@ output "prometheus_metrics_url" {
   value       = "http://${module.ec2.public_ip}:9090"
 }
 
+output "ecr_repository_url" {
+  description = "The URL of the ECR container repository"
+  value       = module.ecr.repository_url
+}
+
+

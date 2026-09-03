@@ -16,6 +16,8 @@ async function seedDatabase() {
         await exec(`
             DELETE FROM audit_logs;
             DELETE FROM fraud_events;
+            DELETE FROM sensor_telemetry;
+            DELETE FROM iot_devices;
             DELETE FROM charging_sessions;
             DELETE FROM ev_chargers;
             DELETE FROM payments;

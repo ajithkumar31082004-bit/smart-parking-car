@@ -129,6 +129,14 @@ module "lambda" {
   tags = local.common_tags
 }
 
+# 9. ECR Module (Elastic Container Registry)
+module "ecr" {
+  source = "./modules/ecr"
+
+  repository_name = "smartpark-ai"
+  tags            = local.common_tags
+}
+
 # ==============================================================================
 # 9. CloudWatch Alarms & Monitoring Integration
 # ==============================================================================

@@ -15,8 +15,40 @@ const aiRoutes = require('./routes/aiRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const iotRoutes = require('./routes/iotRoutes');
+
+// Prometheus Observability Setup
+const client = require('prom-client');
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ register: client.register });
+
+const httpRequestCounter = new client.Counter({
+    name: 'smartpark_http_requests_total',
+    help: 'Total number of HTTP requests processed by SmartPark AI',
+    labelNames: ['method', 'route', 'status_code']
+});
+
+const httpRequestDuration = new client.Histogram({
+    name: 'smartpark_http_request_duration_seconds',
+    help: 'HTTP request duration in seconds',
+    labelNames: ['method', 'route', 'status_code'],
+    buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5]
+});
 
 const app = express();
+
+// Track request metrics middleware
+app.use((req, res, next) => {
+    const start = process.hrtime();
+    res.on('finish', () => {
+        const diff = process.hrtime(start);
+        const durationSec = diff[0] + diff[1] / 1e9;
+        const routePath = req.baseUrl || req.path || 'unknown';
+        httpRequestCounter.inc({ method: req.method, route: routePath, status_code: res.statusCode });
+        httpRequestDuration.observe({ method: req.method, route: routePath, status_code: res.statusCode }, durationSec);
+    });
+    next();
+});
 
 // Security & Middlewares
 const _allowedOrigins = (process.env.ALLOWED_ORIGINS || '*')
@@ -46,6 +78,16 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
+// Prometheus Metrics Endpoint
+app.get('/metrics', async (req, res) => {
+    try {
+        res.set('Content-Type', client.register.contentType);
+        res.end(await client.register.metrics());
+    } catch (err) {
+        res.status(500).end(err);
+    }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({
@@ -67,6 +109,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/iot', iotRoutes);
 
 // Static assets serving (serve both frontend directory and root workspace)
 app.use('/frontend', express.static(path.join(__dirname, '../../frontend')));
