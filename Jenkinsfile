@@ -8,7 +8,7 @@ pipeline {
         IMAGE_NAME = 'smartparkingcar'
         DOCKER_USER = 'ajithkumar3108'
 
-        EC2_HOST = '13.207.153.69'
+        EC2_HOST = '13.127.178.243'
         EC2_USER = 'ubuntu'
 
         SSH_CREDENTIALS_ID = 'ec2-ssh-key'
