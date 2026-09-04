@@ -4,7 +4,7 @@ const API_BASE = '/api';
 const API = {
     // Generic request helper
     async request(endpoint, options = {}) {
-        const token = localStorage.getItem('smartpark_token');
+        const token = localStorage.getItem('smartpark_token') || localStorage.getItem('sp_token');
         const headers = {
             'Content-Type': 'application/json',
             ...(token && { Authorization: `Bearer ${token}` }),

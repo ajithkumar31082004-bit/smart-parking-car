@@ -352,6 +352,7 @@
 
     <script src="/frontend/js/theme.js"></script>
     <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
     <script>
         function togglePassword(id, btn) {
             const input = document.getElementById(id);
@@ -366,6 +367,13 @@
         }
 
         function roleRedirect(role) {
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get('redirect');
+            if (redirect && !redirect.includes('login')) {
+                window.location.href = redirect;
+                return;
+            }
+
             const routes = {
                 admin: '/admin.html',
                 staff: '/staff-scanner.html',
@@ -391,10 +399,9 @@
             try {
                 const res = await API.login(email, password);
                 if (res && res.token) {
-                    localStorage.setItem('sp_token', res.token);
-                    localStorage.setItem('sp_user', JSON.stringify(res.user));
+                    Auth.login(res.token, res.user);
                     showToast('Welcome back, ' + res.user.name + '!', 'success');
-                    setTimeout(() => roleRedirect(res.user.role), 800);
+                    setTimeout(() => roleRedirect(res.user.role), 600);
                 } else {
                     throw new Error(res.error || 'Login failed. Please try again.');
                 }
@@ -416,11 +423,10 @@
         }
 
         // Redirect if already logged in
-        if (localStorage.getItem('sp_token')) {
-            const u = JSON.parse(localStorage.getItem('sp_user') || '{}');
-            if (u.role) {
-                const routes = { admin: '/admin.html', staff: '/staff-scanner.html', manager: '/admin.html', customer: '/dashboard.html', superadmin: '/admin.html' };
-                window.location.href = routes[u.role] || '/dashboard.html';
+        if (Auth.isLoggedIn()) {
+            const user = Auth.getUser();
+            if (user && user.role) {
+                roleRedirect(user.role);
             }
         }
     </script>

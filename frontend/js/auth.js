@@ -2,12 +2,12 @@
 
 const Auth = {
     getUser() {
-        const u = localStorage.getItem('smartpark_user');
+        const u = localStorage.getItem('smartpark_user') || localStorage.getItem('sp_user');
         return u ? JSON.parse(u) : null;
     },
 
     getToken() {
-        return localStorage.getItem('smartpark_token');
+        return localStorage.getItem('smartpark_token') || localStorage.getItem('sp_token');
     },
 
     isLoggedIn() {
@@ -24,12 +24,17 @@ const Auth = {
     login(token, user) {
         localStorage.setItem('smartpark_token', token);
         localStorage.setItem('smartpark_user', JSON.stringify(user));
+        // Backwards compatibility
+        localStorage.setItem('sp_token', token);
+        localStorage.setItem('sp_user', JSON.stringify(user));
         this.renderNav();
     },
 
     logout() {
         localStorage.removeItem('smartpark_token');
         localStorage.removeItem('smartpark_user');
+        localStorage.removeItem('sp_token');
+        localStorage.removeItem('sp_user');
         window.location.href = '/login.html';
     },
 
