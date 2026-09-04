@@ -189,9 +189,31 @@
     <script src="/frontend/js/auth.js"></script>
     <script>
         async function initializeDashboard() {
-            if (!Auth.requireAuth()) return;
+            if (!Auth.isLoggedIn()) {
+                const tbody = document.getElementById('bookingsTableBody');
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding:3rem 1rem;">
+                                <div style="font-size:1.1rem; font-weight:700; margin-bottom:0.5rem; color:var(--text-main);">
+                                    <i class="fas fa-lock" style="color:var(--primary); margin-right:0.5rem;"></i> Authentication Required
+                                </div>
+                                <p style="color:var(--text-muted); margin-bottom:1.25rem;">Please sign in to view your active parking passes and reservation history.</p>
+                                <a href="/login.html?redirect=/dashboard.html" class="btn btn-primary btn-sm"><i class="fas fa-sign-in-alt"></i> Sign In to Account</a>
+                            </td>
+                        </tr>
+                    `;
+                }
+                const garage = document.getElementById('garageList');
+                if (garage) garage.innerHTML = `<div style="color:var(--text-muted); font-size:0.85rem; padding:0.5rem 0;"><a href="/login.html">Log in</a> to view vehicles.</div>`;
+                const notifs = document.getElementById('notificationsList');
+                if (notifs) notifs.innerHTML = `<div style="color:var(--text-muted); font-size:0.85rem; padding:0.5rem 0;">No notifications.</div>`;
+                Auth.requireAuth();
+                return;
+            }
+
             const user = Auth.getUser();
-            if (user) {
+            if (user && user.name) {
                 document.getElementById('dashWelcome').innerText = `Welcome Back, ${user.name}!`;
             }
             loadUserBookings();
@@ -212,8 +234,8 @@
                 const active = res.bookings.find(b => b.status === 'active' || b.status === 'confirmed');
                 if (active) {
                     document.getElementById('activePassBanner').style.display = 'flex';
-                    document.getElementById('actSlotNum').innerText = `Slot ${active.slot_number} (${active.slot_type.toUpperCase()})`;
-                    document.getElementById('actLocName').innerText = active.location_name;
+                    document.getElementById('actSlotNum').innerText = `Slot ${active.slot_number || 'A1'} (${(active.slot_type || 'standard').toUpperCase()})`;
+                    document.getElementById('actLocName').innerText = active.location_name || 'SmartPark Deck';
                     document.getElementById('actVehiclePlate').innerText = `Vehicle: ${active.vehicle_number || 'Registered Car'}`;
                     document.getElementById('actQrThumb').src = `https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(active.qr_token || active.booking_code)}`;
                     document.getElementById('actPassLink').href = `/bill.html?code=${active.booking_code}`;
@@ -224,15 +246,17 @@
                     if (b.status === 'active' || b.status === 'confirmed') statusBadge = `<span class="badge badge-success">${b.status}</span>`;
                     if (b.status === 'cancelled') statusBadge = `<span class="badge badge-danger">${b.status}</span>`;
 
+                    const amount = Number(b.total_amount || 0).toFixed(2);
+
                     return `
                         <tr>
                             <td><strong style="color:var(--primary);">${b.booking_code}</strong></td>
                             <td>
-                                <div><strong>${b.slot_number}</strong> (${b.slot_type})</div>
-                                <div style="font-size:0.75rem; color:var(--text-muted);">${b.location_name}</div>
+                                <div><strong>${b.slot_number || '-'}</strong> (${b.slot_type || 'Standard'})</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted);">${b.location_name || '-'}</div>
                             </td>
                             <td>${b.vehicle_number || '-'}</td>
-                            <td><strong>₹${b.total_amount.toFixed(2)}</strong></td>
+                            <td><strong>₹${amount}</strong></td>
                             <td>${statusBadge}</td>
                             <td>
                                 <div style="display:flex; gap:0.4rem;">
@@ -246,7 +270,14 @@
                     `;
                 }).join('');
             } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="6" style="color:var(--danger); text-align:center;">Failed to load bookings: ${e.message}</td></tr>`;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="color:var(--danger); text-align:center; padding:1.5rem;">
+                            <div><i class="fas fa-exclamation-triangle"></i> Failed to load bookings: ${e.message}</div>
+                            <button onclick="loadUserBookings()" class="btn btn-secondary btn-sm" style="margin-top:0.5rem;"><i class="fas fa-sync-alt"></i> Retry</button>
+                        </td>
+                    </tr>
+                `;
             }
         }
 
