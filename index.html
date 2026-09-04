@@ -26,7 +26,7 @@
                         var(--bg-body);
         }
 
-        /* Animated grid lines */
+        /* Clean subtle grid lines without continuous shifting */
         .hero-grid {
             position: absolute; inset: 0;
             background-image:
@@ -34,26 +34,14 @@
                 linear-gradient(90deg, rgba(37,99,235,0.06) 1px, transparent 1px);
             background-size: 48px 48px;
             mask-image: radial-gradient(ellipse 80% 80% at center, black 30%, transparent 80%);
-            animation: gridShift 20s linear infinite;
         }
 
-        @keyframes gridShift {
-            0%   { background-position: 0 0; }
-            100% { background-position: 48px 48px; }
-        }
-
-        /* Floating particles */
+        /* Subtle particles without heavy jumping */
         .particle {
             position: absolute;
             border-radius: 50%;
-            animation: float linear infinite;
-            opacity: 0.5;
-        }
-
-        @keyframes float {
-            0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0.4; }
-            50%  { opacity: 0.7; }
-            100% { transform: translateY(-80px) translateX(20px) scale(0.8); opacity: 0; }
+            opacity: 0.35;
+            pointer-events: none;
         }
 
         .hero-content {
@@ -250,13 +238,13 @@
             box-shadow: var(--shadow-xl);
             font-size: 0.82rem;
             max-width: 210px;
-            animation: floatCard 4s ease-in-out infinite;
             z-index: 5;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        @keyframes floatCard {
-            0%, 100% { transform: translateY(0); }
-            50%       { transform: translateY(-8px); }
+        .ai-float-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-2xl);
         }
 
         .ai-float-card .ai-label {
@@ -280,8 +268,13 @@
             box-shadow: var(--shadow-xl);
             font-size: 0.82rem;
             max-width: 190px;
-            animation: floatCard 4s ease-in-out infinite 2s;
             z-index: 5;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .price-float-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-2xl);
         }
 
         /* ── Search Box ──────────────────────────── */
@@ -1325,8 +1318,9 @@
 
         function renderVizGrid() {
             const grid = document.getElementById('heroVizGrid');
-            grid.innerHTML = vizSlots.map(s => `
-                <div class="viz-slot ${s.status}" title="${s.id} — ${s.status}" onclick="window.location='/slots.html'">
+            if (!grid) return;
+            grid.innerHTML = vizSlots.map((s, idx) => `
+                <div class="viz-slot ${s.status}" id="heroSlot-${idx}" title="${s.id} — ${s.status}" onclick="window.location='/slots.html'">
                     <i class="${statusIcons[s.status]}"></i>
                     <span>${s.id}</span>
                 </div>
@@ -1336,22 +1330,35 @@
 
         function updateVizStats() {
             const counts = vizSlots.reduce((acc, s) => { acc[s.status] = (acc[s.status] || 0) + 1; return acc; }, {});
-            document.getElementById('vizAvail').textContent = counts.available || 0;
-            document.getElementById('vizOcc').textContent   = counts.occupied  || 0;
-            document.getElementById('vizEv').textContent    = counts.ev        || 0;
-            document.getElementById('vizRes').textContent   = counts.reserved  || 0;
+            const elAvail = document.getElementById('vizAvail');
+            const elOcc   = document.getElementById('vizOcc');
+            const elEv    = document.getElementById('vizEv');
+            const elRes   = document.getElementById('vizRes');
+            if (elAvail) elAvail.textContent = counts.available || 0;
+            if (elOcc)   elOcc.textContent   = counts.occupied  || 0;
+            if (elEv)    elEv.textContent    = counts.ev        || 0;
+            if (elRes)   elRes.textContent   = counts.reserved  || 0;
         }
 
-        // Randomly animate a few slots every 3s to show "live" feel
+        // Smooth in-place status update without destroying/recreating DOM
         function animateViz() {
-            const statuses = ['available', 'available', 'available', 'occupied', 'reserved', 'ev'];
+            const statuses = ['available', 'available', 'occupied', 'reserved', 'ev'];
             const idx = Math.floor(Math.random() * vizSlots.length);
-            vizSlots[idx].status = statuses[Math.floor(Math.random() * statuses.length)];
-            renderVizGrid();
+            const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+            vizSlots[idx].status = newStatus;
+            
+            const el = document.getElementById(`heroSlot-${idx}`);
+            if (el) {
+                el.className = `viz-slot ${newStatus}`;
+                el.title = `${vizSlots[idx].id} — ${newStatus}`;
+                const icon = el.querySelector('i');
+                if (icon) icon.className = statusIcons[newStatus];
+            }
+            updateVizStats();
         }
 
         renderVizGrid();
-        setInterval(animateViz, 3000);
+        setInterval(animateViz, 6000);
 
         // ── Load live stats from API ───────────────────
         async function loadLiveStats() {

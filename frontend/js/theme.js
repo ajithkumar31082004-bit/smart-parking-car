@@ -1,6 +1,6 @@
 // Theme Toggle & Persistence
 (function () {
-    const savedTheme = localStorage.getItem('smartpark_theme') || 'light';
+    const savedTheme = localStorage.getItem('smartpark_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     window.toggleTheme = function () {
